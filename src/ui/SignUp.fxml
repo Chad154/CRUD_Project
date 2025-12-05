@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="CRUD_Project.ui.SignUPController">
+    <children>
+        <Label fx:id="signup" alignment="TOP_CENTER" layoutX="487.0" layoutY="111.0" text="Sign UP" />
+        <TextField fx:id="tfName" layoutX="334.0" layoutY="149.0" prefHeight="25.0" prefWidth="376.0" promptText="Name">
+            <tooltip>
+                <Tooltip fx:id="tpName" text="Put your name here" />
+            </tooltip>
+        </TextField>
+        <TextField fx:id="tfLastname" layoutX="334.0" layoutY="186.0" prefHeight="25.0" prefWidth="376.0" promptText="Lastname">
+            <tooltip>
+                <Tooltip text="Put yout lastname here" />
+            </tooltip>
+        </TextField>
+        <TextField fx:id="tfMidleeInitial" layoutX="334.0" layoutY="222.0" prefHeight="25.0" prefWidth="376.0" promptText="MidleInitial">
+            <tooltip>
+                <Tooltip text="Put your MidleInitial letter" />
+            </tooltip>
+        </TextField>
+        <TextField fx:id="tfStreet" layoutX="334.0" layoutY="259.0" prefHeight="25.0" prefWidth="376.0" promptText="Street">
+            <tooltip>
+                <Tooltip text="Put here your adress" />
+            </tooltip>
+        </TextField>
+        <TextField fx:id="tfCity" layoutX="334.0" layoutY="295.0" prefHeight="25.0" prefWidth="376.0" promptText="City">
+            <tooltip>
+                <Tooltip text="Put here your City" />
+            </tooltip>
+        </TextField>
+        <TextField fx:id="tfState" layoutX="334.0" layoutY="334.0" prefHeight="25.0" prefWidth="376.0" promptText="State">
+            <tooltip>
+                <Tooltip text="Put your State here" />
+            </tooltip>
+        </TextField>
+        <TextField fx:id="tfZip" layoutX="334.0" layoutY="371.0" prefHeight="25.0" prefWidth="376.0" promptText="Zip">
+            <tooltip>
+                <Tooltip text="Put your ZIP number here" />
+            </tooltip>
+        </TextField>
+        <TextField fx:id="tfPhone" layoutX="334.0" layoutY="406.0" prefHeight="25.0" prefWidth="376.0" promptText="Phone">
+            <tooltip>
+                <Tooltip text="Put your Phone number here&quot;" />
+            </tooltip>
+        </TextField>
+        <TextField fx:id="tfEmail" layoutX="334.0" layoutY="439.0" prefHeight="25.0" prefWidth="376.0" promptText="Email">
+            <tooltip>
+                <Tooltip text="Put your email with this format &quot;Example@example.example" />
+            </tooltip>
+        </TextField>
+        <PasswordField fx:id="pwPassword" layoutX="334.0" layoutY="477.0" prefHeight="25.0" prefWidth="376.0" promptText="Password">
+            <tooltip>
+                <Tooltip text="At least 8 characters" />
+            </tooltip>
+        </PasswordField>
+        <PasswordField fx:id="pfPasswordValidation" layoutX="334.0" layoutY="513.0" prefHeight="25.0" prefWidth="376.0" promptText="Repeat Password">
+            <tooltip>
+                <Tooltip text="Repeat your password" />
+            </tooltip>
+        </PasswordField>
+        <Button fx:id="btSignUp" layoutX="739.0" layoutY="595.0" mnemonicParsing="false" text="Sign Up" />
+        <Label layoutX="287.0" layoutY="154.0" text="Name " />
+        <Label layoutX="261.0" layoutY="191.0" text="Lastname " />
+        <Label layoutX="258.0" layoutY="227.0" text="Midleinitial " />
+        <Label layoutX="287.0" layoutY="264.0" text="Street " />
+        <Label layoutX="305.0" layoutY="300.0" text="City " />
+        <Label layoutX="292.0" layoutY="339.0" text="State" />
+        <Label layoutX="308.0" layoutY="376.0" text="ZIP " />
+        <Label layoutX="287.0" layoutY="411.0" text="Phone " />
+        <Label layoutX="289.0" layoutY="444.0" text="Email " />
+        <Label layoutX="268.0" layoutY="482.0" text="Password " />
+        <Label layoutX="217.0" layoutY="518.0" text="Repeat Password " />
+        <Button fx:id="btExit" layoutX="460.0" layoutY="620.0" mnemonicParsing="false" text="Exit" />
+    </children>
+</Pane>

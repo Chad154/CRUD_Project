@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import proyectosignup.signin.ui.ChangeController?>
+
+<!-- AÑADE fx:controller EN EL ELEMENTO RAIZ -->
+<Pane fx:controller="proyectosignup.signin.ui.ChangeController" 
+      maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+      prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" 
+      xmlns:fx="http://javafx.com/fxml/1">
+   
+   <children>
+      <Button fx:id="btChange" layoutX="538.0" layoutY="515.0" mnemonicParsing="false" text="Change" />
+      <PasswordField fx:id="CurrentPassword" layoutX="324.0" layoutY="348.0" prefHeight="25.0" prefWidth="376.0" promptText="Current Password">
+         <tooltip>
+            <Tooltip text="At least 8 characters lenght" />
+         </tooltip>
+      </PasswordField>
+      <PasswordField fx:id="NewPassword" layoutX="324.0" layoutY="385.0" prefHeight="25.0" prefWidth="376.0" promptText="New Password">
+         <tooltip>
+            <Tooltip text="At least 8 characters lenght" />
+         </tooltip>
+      </PasswordField>
+      <PasswordField fx:id="ConfirmPassword" layoutX="324.0" layoutY="423.0" prefHeight="25.0" prefWidth="376.0" promptText="Confirm Password" />
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="423.0" layoutY="310.0" text="Change Password" textAlignment="CENTER" />
+      <Button fx:id="btCancel" layoutX="355.0" layoutY="515.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="68.0" text="Cancel" />
+      <Label layoutX="203.0" layoutY="353.0" text="Current Password " />
+      <Label layoutX="225.0" layoutY="390.0" text="New Password " />
+      <Label layoutX="202.0" layoutY="428.0" text="Confirm Password " />
+   </children>
+</Pane>
