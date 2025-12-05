@@ -3,10 +3,10 @@
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
-<?import proyectosignup.signin.ui.ChangeController?>
+
 
 <!-- AÑADE fx:controller EN EL ELEMENTO RAIZ -->
-<Pane fx:controller="proyectosignup.signin.ui.ChangeController" 
+<Pane fx:controller="CRUD_Project.ui.ChangeController" 
       maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
       prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" 
       xmlns:fx="http://javafx.com/fxml/1">
