@@ -20,7 +20,7 @@ import javax.ws.rs.client.WebTarget;
  *        client.close();
  * </pre>
  *
- * @author aitor
+ * @author Chad, Daniel e Imad
  */
 public class AccountRESTClient {
 

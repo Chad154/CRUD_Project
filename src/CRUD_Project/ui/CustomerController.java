@@ -7,19 +7,20 @@ package CRUD_Project.ui;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.Sta ge;
+import javafx.stage.Stage;
 
 /**
  * FXML Controller class
  *
  * @author chad
  */
-public class CustomerController implements Initializable {
+public class CustomerController{
 
     @FXML
     private Label lblCustomerID;
@@ -61,6 +62,7 @@ public class CustomerController implements Initializable {
     /**
      * Initializes the controller class.
      */
+    private static final Logger LOGGER = Logger.getLogger("CRUD_Project.ui");
     
     private Stage stage;
     
