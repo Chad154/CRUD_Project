@@ -21,57 +21,109 @@ public class CustomerController {
     private static final Logger LOGGER = Logger.getLogger(CustomerController.class.getName());
 
     // Campos (UI)
-    @FXML private TextField tfId;
-    @FXML private TextField tfFirstName;
-    @FXML private TextField tfLastName;
-    @FXML private TextField tfMiddleInitial;
-    @FXML private TextField tfEmail;
-    @FXML private PasswordField pfPassword;
+    @FXML
+    private TextField tfId;
+    @FXML
+    private TextField tfFirstName;
+    @FXML
+    private TextField tfLastName;
+    @FXML
+    private TextField tfMiddleInitial;
+    @FXML
+    private TextField tfEmail;
+    @FXML
+    private PasswordField pfPassword;
 
-    @FXML private TextField tfStreet;
-    @FXML private TextField tfCity;
-    @FXML private TextField tfState;
-    @FXML private TextField tfZip;
-    @FXML private TextField tfPhone;
+    @FXML
+    private TextField tfStreet;
+    @FXML
+    private TextField tfCity;
+    @FXML
+    private TextField tfState;
+    @FXML
+    private TextField tfZip;
+    @FXML
+    private TextField tfPhone;
 
     // Botones
-    @FXML private Button btSearch;
-    @FXML private Button btCreate;
-    @FXML private Button btUpdate;
-    @FXML private Button btDelete;
-    @FXML private Button btRefresh;
-    @FXML private Button btExit;
+    @FXML
+    private Button btSearch;
+    @FXML
+    private Button btCreate;
+    @FXML
+    private Button btUpdate;
+    @FXML
+    private Button btDelete;
+    @FXML
+    private Button btRefresh;
+    @FXML
+    private Button btExit;
 
     // Tabla
-    @FXML private TableView<Customer> tvCustomers;
-    @FXML private TableColumn<Customer, String> colId;
-    @FXML private TableColumn<Customer, String> colFirstName;
-    @FXML private TableColumn<Customer, String> colLastName;
-    @FXML private TableColumn<Customer, String> colEmail;
-    @FXML private TableColumn<Customer, String> colCity;
-    @FXML private TableColumn<Customer, String> colPhone;
+    @FXML
+    private TableView<Customer> tvCustomers;
+    @FXML
+    private TableColumn<Customer, String> colId;
+    @FXML
+    private TableColumn<Customer, String> colFirstName;
+    @FXML
+    private TableColumn<Customer, String> colLastName;
+    @FXML
+    private TableColumn<Customer, String> colEmail;
+    @FXML
+    private TableColumn<Customer, String> colCity;
+    @FXML
+    private TableColumn<Customer, String> colPhone;
+    @FXML
+    private TableColumn<Customer, String> colMiddleInitial;
+    @FXML
+    private TableColumn<Customer, String> colStreet;
+    @FXML
+    private TableColumn<Customer, String> colState;
+    @FXML
+    private TableColumn<Customer, String> colZip;
 
     private final ObservableList<Customer> lista = FXCollections.observableArrayList();
 
     public void init(Stage stage) {
 
-        colId.setCellValueFactory(data ->
-                new SimpleStringProperty(data.getValue().getId() == null ? "" : String.valueOf(data.getValue().getId())));
-        colFirstName.setCellValueFactory(data ->
-                new SimpleStringProperty(texto(data.getValue().getFirstName())));
-        colLastName.setCellValueFactory(data ->
-                new SimpleStringProperty(texto(data.getValue().getLastName())));
-        colEmail.setCellValueFactory(data ->
-                new SimpleStringProperty(texto(data.getValue().getEmail())));
-        colCity.setCellValueFactory(data ->
-                new SimpleStringProperty(texto(data.getValue().getCity())));
-        colPhone.setCellValueFactory(data ->
-                new SimpleStringProperty(data.getValue().getPhone() == null ? "" : String.valueOf(data.getValue().getPhone())));
+        colId.setCellValueFactory(data
+                -> new SimpleStringProperty(data.getValue().getId() == null ? "" : String.valueOf(data.getValue().getId())));
+        colFirstName.setCellValueFactory(data
+                -> new SimpleStringProperty(texto(data.getValue().getFirstName())));
+        colLastName.setCellValueFactory(data
+                -> new SimpleStringProperty(texto(data.getValue().getLastName())));
+        colEmail.setCellValueFactory(data
+                -> new SimpleStringProperty(texto(data.getValue().getEmail())));
+        colCity.setCellValueFactory(data
+                -> new SimpleStringProperty(texto(data.getValue().getCity())));
+        colPhone.setCellValueFactory(data
+                -> new SimpleStringProperty(data.getValue().getPhone() == null ? "" : String.valueOf(data.getValue().getPhone())));
+        colMiddleInitial.setCellValueFactory(d
+                -> new SimpleStringProperty(texto(d.getValue().getMiddleInitial())));
+
+        colStreet.setCellValueFactory(d
+                -> new SimpleStringProperty(texto(d.getValue().getStreet())));
+
+        colState.setCellValueFactory(d
+                -> new SimpleStringProperty(texto(d.getValue().getState())));
+
+        colZip.setCellValueFactory(d
+                -> new SimpleStringProperty(
+                        d.getValue().getZip() == null ? "" : d.getValue().getZip().toString()
+                ));
+
+        colPhone.setCellValueFactory(d
+                -> new SimpleStringProperty(
+                        d.getValue().getPhone() == null ? "" : d.getValue().getPhone().toString()
+                ));
 
         tvCustomers.setItems(lista);
 
         tvCustomers.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
-            if (newV != null) ponerEnFormulario(newV);
+            if (newV != null) {
+                ponerEnFormulario(newV);
+            }
         });
 
         btRefresh.setOnAction(e -> cargarLista());
@@ -82,7 +134,7 @@ public class CustomerController {
         btExit.setOnAction(e -> cerrar());
 
         cargarLista();
-        
+
         btExit.setCancelButton(true);
         btSearch.setDefaultButton(true);
         tfId.requestFocus();
@@ -93,7 +145,9 @@ public class CustomerController {
         try {
             Customer[] customers = client.findAll_XML(Customer[].class);
             lista.clear();
-            if (customers != null) lista.addAll(Arrays.asList(customers));
+            if (customers != null) {
+                lista.addAll(Arrays.asList(customers));
+            }
         } catch (Exception ex) {
             mostrarError("Error", "No se pudo cargar la lista:\n" + ex.getMessage());
         } finally {
@@ -113,8 +167,11 @@ public class CustomerController {
         CustomerRESTClient client = new CustomerRESTClient();
         try {
             Customer c = client.find_XML(Customer.class, idTxt);
-            if (c == null) mostrarInfo("No encontrado", "No existe customer con ese ID.");
-            else ponerEnFormulario(c);
+            if (c == null) {
+                mostrarInfo("No encontrado", "No existe customer con ese ID.");
+            } else {
+                ponerEnFormulario(c);
+            }
         } catch (NotFoundException ex) {
             mostrarInfo("No encontrado", "No existe customer con ese ID.");
         } catch (Exception ex) {
@@ -125,7 +182,9 @@ public class CustomerController {
     }
 
     private void crear() {
-        if (!validarFormulario(false)) return;
+        if (!validarFormulario(false)) {
+            return;
+        }
 
         Customer c = construirCustomerDesdeFormulario(null);
 
@@ -151,7 +210,9 @@ public class CustomerController {
         }
         marcarError(tfId, false);
 
-        if (!validarFormulario(true)) return;
+        if (!validarFormulario(true)) {
+            return;
+        }
 
         Long id = Long.parseLong(idTxt);
         Customer c = construirCustomerDesdeFormulario(id);
@@ -182,7 +243,9 @@ public class CustomerController {
                 ButtonType.OK, ButtonType.CANCEL);
         confirm.setHeaderText("Confirmar borrado");
 
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
 
         CustomerRESTClient client = new CustomerRESTClient();
         try {
@@ -199,14 +262,16 @@ public class CustomerController {
 
     private Customer construirCustomerDesdeFormulario(Long id) {
         Customer c = new Customer();
-        if (id != null) c.setId(id);
+        if (id != null) {
+            c.setId(id);
+        }
 
         c.setFirstName(texto(tfFirstName.getText()));
         c.setLastName(texto(tfLastName.getText()));
         c.setMiddleInitial(texto(tfMiddleInitial.getText()));
         c.setEmail(texto(tfEmail.getText()));
         c.setPassword(texto(pfPassword.getText()));
-  
+
         c.setStreet(texto(tfStreet.getText()));
         c.setCity(texto(tfCity.getText()));
         c.setState(texto(tfState.getText()));
@@ -261,10 +326,11 @@ public class CustomerController {
     }
 
     /**
-     * Validaciones básicas (ajústalas si tu profe pide reglas concretas).
-     * - create/update: mismos checks.
-     * - id se valida fuera (solo en update/delete/search).
+     * Validaciones básicas (ajústalas si tu profe pide reglas concretas). -
+     * create/update: mismos checks. - id se valida fuera (solo en
+     * update/delete/search).
      */
+    
     private boolean validarFormulario(boolean esUpdate) {
         boolean ok = true;
 
