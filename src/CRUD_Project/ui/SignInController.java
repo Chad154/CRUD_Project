@@ -33,7 +33,8 @@ import CRUD_Project.model.Customer;
  * @author Imad
  */
 public class SignInController {
-    @FXML //si no pones esto te saldra el error de null pointer
+
+    @FXML
     private TextField tfUsername;
     @FXML
     private PasswordField pfPassword;
@@ -43,19 +44,19 @@ public class SignInController {
     private Hyperlink Hipervinculo;
     @FXML
     private Button bExit;
-    
-    private static final Logger LOGGER=Logger.getLogger("proyectosignup.signup.ui");
+
+    private static final Logger LOGGER = Logger.getLogger("proyectosignup.signup.ui");
 
     public void init(Stage stage, Parent root) {
         LOGGER.info("Initializing window.");
         Scene scene = new Scene(root);
         stage.setScene(scene);
         //establecer titulo de la ventana
-            stage.setTitle("Sign in");
+        stage.setTitle("Sign in");
         //La ventana no debe ser redimensionable.
-            stage.setResizable(false);
+        stage.setResizable(false);
         //desabilitar botones
-            //boton.setDisable(true);
+        //boton.setDisable(true);
         //Los campos de username y password tendrán un texto de fondo.
         //Se enfoca inicialmente en el campo username.
         //asociar eventos a manejadores
@@ -65,17 +66,15 @@ public class SignInController {
         //asociacion de manejadores a properties
         tfUsername.textProperty().addListener(this::handletfUsernameTextChange);
         tfUsername.focusedProperty().addListener(this::handletfUsernameFocusChange);
-        
+
         pfPassword.textProperty().addListener(this::handleftPasswordTextChange);
         pfPassword.focusedProperty().addListener(this::handletfPasswordFocusChange);
-        
-        
-        
-        
+
         //Mostar la ventana
         stage.show();
 
     }
+
     //hipervinculo, inicia la ventana signup y cierra signin
     private void handleHiperVinculoMethod(ActionEvent event) {
         try {
@@ -102,17 +101,14 @@ public class SignInController {
         }
     }
 
-
-
-
-
     //botones-------------------
     //cierra el programa
-    private void handlebExitMethod(ActionEvent event){
+    private void handlebExitMethod(ActionEvent event) {
         Platform.exit();
     }
+
     //cierra signin y abre la ventana changepassword
-    private void handlebLogInMethod(ActionEvent event){
+    private void handlebLogInMethod(ActionEvent event) {
         try {
             if (this.tfUsername.getText().trim().equals("") || this.pfPassword.getText().trim().equals("")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR,
@@ -169,88 +165,89 @@ public class SignInController {
 
     //campos--------------------
     /**
-     * 
+     *
      * @param observable
      * @param oldValue
-     * @param newValue 
+     * @param newValue
      */
-    
     //username
-    private void handletfUsernameTextChange(ObservableValue observable,String oldValue,String newValue){
-        try{
-            
+    private void handletfUsernameTextChange(ObservableValue observable, String oldValue, String newValue) {
+        try {
+
             //Quitar borde rojo si el usuario escribe algo
             if (!newValue.trim().isEmpty()) {
                 tfUsername.setStyle(null);
             }
-            
-            if (newValue.length()>200) {
+
+            if (newValue.length() > 200) {
                 Alert alert = new Alert(Alert.AlertType.ERROR,
-                "Usuario demasiado largo",
-                ButtonType.OK);
+                        "Usuario demasiado largo",
+                        ButtonType.OK);
                 alert.showAndWait();
                 tfUsername.clear();
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             LOGGER.warning(e.getLocalizedMessage());
-            new Alert(AlertType.INFORMATION,"ERROR: Usuario demasiado largo").showAndWait();
+            new Alert(AlertType.INFORMATION, "ERROR: Usuario demasiado largo").showAndWait();
         }
     }
+
     /**
-     * 
+     *
      * @param observable
      * @param oldValue
-     * @param newValue 
+     * @param newValue
      */
-    private void handletfUsernameFocusChange(ObservableValue observable,Boolean oldValue,Boolean newValue){
+    private void handletfUsernameFocusChange(ObservableValue observable, Boolean oldValue, Boolean newValue) {
         if (newValue) {//si NewValue es true estas ganando el foco, y en else seria la perdida,y viceversa.  !oldValue, si lo niego, quiere decir q si era false,no estaba enfocado
             LOGGER.info("onFocus");
             tfUsername.requestFocus();
-        }else if(oldValue){
+        } else if (oldValue) {
             LOGGER.info("onBlur");
         }
     }
+
     /**
-     * 
+     *
      * @param observable
      * @param oldValue
-     * @param newValue 
+     * @param newValue
      */
     //password
-    private void handleftPasswordTextChange(ObservableValue observable,String oldValue,String newValue){
-        try{
-            
+    private void handleftPasswordTextChange(ObservableValue observable, String oldValue, String newValue) {
+        try {
+
             //Quitar borde rojo si el usuario escribe algo
             if (!newValue.trim().isEmpty()) {
                 pfPassword.setStyle(null);
             }
-            
-            if (newValue.length()>200) {
+
+            if (newValue.length() > 200) {
                 Alert alert = new Alert(Alert.AlertType.ERROR,
-                "Contraseña demasiada larga",
-                ButtonType.OK);
-                alert.showAndWait(); 
+                        "Contraseña demasiada larga",
+                        ButtonType.OK);
+                alert.showAndWait();
                 pfPassword.clear();
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             LOGGER.warning(e.getLocalizedMessage());
-            new Alert(AlertType.INFORMATION,"ERROR: Contraseña demasiada larga").showAndWait();
+            new Alert(AlertType.INFORMATION, "ERROR: Contraseña demasiada larga").showAndWait();
         }
     }
+
     /**
-     * 
+     *
      * @param observable
      * @param oldValue
-     * @param newValue 
+     * @param newValue
      */
-    private void handletfPasswordFocusChange(ObservableValue observable,Boolean oldValue,Boolean newValue){
+    private void handletfPasswordFocusChange(ObservableValue observable, Boolean oldValue, Boolean newValue) {
         if (newValue) {
             LOGGER.info("onFocus");
             pfPassword.requestFocus();
-        }else if(oldValue){
+        } else if (oldValue) {
             LOGGER.info("onBlur");
         }
     }
-    
+
 }
-    

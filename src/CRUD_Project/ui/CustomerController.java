@@ -3,8 +3,6 @@ package CRUD_Project.ui;
 import CRUD_Project.logic.CustomerRESTClient;
 import CRUD_Project.model.Customer;
 import java.util.Arrays;
-import java.util.ResourceBundle;
-import java.net.URL;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,6 +14,10 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
 
+/**
+ *
+ * @author chad
+ */
 public class CustomerController {
 
     private static final Logger LOGGER = Logger.getLogger(CustomerController.class.getName());
@@ -59,7 +61,6 @@ public class CustomerController {
     @FXML
     private Button btExit;
 
-    // Tabla
     @FXML
     private TableView<Customer> tvCustomers;
     @FXML
@@ -85,6 +86,10 @@ public class CustomerController {
 
     private final ObservableList<Customer> lista = FXCollections.observableArrayList();
 
+    /**
+     *
+     * @param stage
+     */
     public void init(Stage stage) {
 
         colId.setCellValueFactory(data
@@ -140,6 +145,9 @@ public class CustomerController {
         tfId.requestFocus();
     }
 
+    /**
+     * Metodo para cargar la base de datos llamando al RestClient
+     */
     private void cargarLista() {
         CustomerRESTClient client = new CustomerRESTClient();
         try {
@@ -155,6 +163,9 @@ public class CustomerController {
         }
     }
 
+    /**
+     *
+     */
     private void buscarPorId() {
         String idTxt = texto(tfId.getText());
         if (!esNumero(idTxt)) {
@@ -181,6 +192,9 @@ public class CustomerController {
         }
     }
 
+    /**
+     *
+     */
     private void crear() {
         if (!validarFormulario(false)) {
             return;
@@ -201,6 +215,9 @@ public class CustomerController {
         }
     }
 
+    /**
+     *
+     */
     private void actualizar() {
         String idTxt = texto(tfId.getText());
         if (!esNumero(idTxt)) {
@@ -229,6 +246,11 @@ public class CustomerController {
         }
     }
 
+    /**
+     * Metodo para borrar un Customer de la BD, valida el ID y pregunta si
+     * quieres borrar el usuario, posteriormente se utiliza el metodo remove del
+     * RestClient
+     */
     private void borrar() {
         String idTxt = texto(tfId.getText());
         if (!esNumero(idTxt)) {
@@ -260,6 +282,12 @@ public class CustomerController {
         }
     }
 
+    /**
+     *
+     * @param id
+     * @return Metodo que recoge todos los datos del formulario y los devuelve
+     * como c
+     */
     private Customer construirCustomerDesdeFormulario(Long id) {
         Customer c = new Customer();
         if (id != null) {
@@ -282,6 +310,11 @@ public class CustomerController {
         return c;
     }
 
+    /**
+     *
+     * @param c Coge c del metodo ConstruirDesdeFormulario y pone valores a cada
+     * parametro
+     */
     private void ponerEnFormulario(Customer c) {
         tfId.setText(c.getId() == null ? "" : String.valueOf(c.getId()));
         tfFirstName.setText(texto(c.getFirstName()));
@@ -297,6 +330,9 @@ public class CustomerController {
         tfPhone.setText(c.getPhone() == null ? "" : String.valueOf(c.getPhone()));
     }
 
+    /**
+     * Limpia todos los campos del formulario
+     */
     private void limpiarFormulario() {
         tfId.clear();
         tfFirstName.clear();
@@ -326,11 +362,11 @@ public class CustomerController {
     }
 
     /**
-     * Validaciones básicas (ajústalas si tu profe pide reglas concretas). -
-     * create/update: mismos checks. - id se valida fuera (solo en
-     * update/delete/search).
+     *
+     * @param esUpdate
+     * @return Metodos de validacion de cada parametro, para la
+     * creacion/actualizacion de los datos dentro de la BD
      */
-    
     private boolean validarFormulario(boolean esUpdate) {
         boolean ok = true;
 
@@ -358,6 +394,12 @@ public class CustomerController {
         return ok;
     }
 
+    /**
+     *
+     * @param tf
+     * @param mensaje
+     * @return
+     */
     private boolean validarObligatorio(TextField tf, String mensaje) {
         if (texto(tf.getText()).isEmpty()) {
             marcarError(tf, true);
@@ -368,6 +410,11 @@ public class CustomerController {
         return true;
     }
 
+    /**
+     *
+     * @param tf
+     * @return
+     */
     private boolean validarEmail(TextField tf) {
         String email = texto(tf.getText());
         if (email.isEmpty() || !email.matches("^.+@.+\\..+$")) {
@@ -379,6 +426,11 @@ public class CustomerController {
         return true;
     }
 
+    /**
+     *
+     * @param pf
+     * @return
+     */
     private boolean validarPassword(PasswordField pf) {
         String pw = texto(pf.getText());
         if (pw.isEmpty() || pw.length() < 4) {
@@ -390,6 +442,11 @@ public class CustomerController {
         return true;
     }
 
+    /**
+     *
+     * @param tf
+     * @return
+     */
     private boolean validarState(TextField tf) {
         String st = texto(tf.getText());
         if (st.isEmpty() || st.length() < 2 || st.length() > 30) {
@@ -401,6 +458,11 @@ public class CustomerController {
         return true;
     }
 
+    /**
+     *
+     * @param tf
+     * @return
+     */
     private boolean validarZip(TextField tf) {
         String zip = texto(tf.getText());
         if (!zip.matches("^\\d{4,10}$")) {
@@ -412,6 +474,11 @@ public class CustomerController {
         return true;
     }
 
+    /**
+     *
+     * @param tf
+     * @return
+     */
     private boolean validarPhone(TextField tf) {
         String ph = texto(tf.getText());
         if (!ph.matches("^\\d{6,15}$")) {
@@ -423,6 +490,11 @@ public class CustomerController {
         return true;
     }
 
+    /**
+     *
+     * @param accion
+     * @param ex
+     */
     private void manejarError(String accion, Throwable ex) {
         LOGGER.warning("Error al " + accion + ": " + ex);
 
@@ -439,10 +511,18 @@ public class CustomerController {
         }
     }
 
+    /**
+     *
+     */
     private void cerrar() {
         ((Stage) btExit.getScene().getWindow()).close();
     }
 
+    /**
+     *
+     * @param titulo
+     * @param msg
+     */
     private void mostrarInfo(String titulo, String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
         a.setTitle(titulo);
@@ -450,6 +530,11 @@ public class CustomerController {
         a.showAndWait();
     }
 
+    /**
+     *
+     * @param titulo
+     * @param msg
+     */
     private void mostrarError(String titulo, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
         a.setTitle(titulo);
@@ -457,14 +542,29 @@ public class CustomerController {
         a.showAndWait();
     }
 
+    /**
+     *
+     * @param tf
+     * @param error
+     */
     private void marcarError(TextField tf, boolean error) {
         tf.setStyle(error ? "-fx-border-color: red;" : null);
     }
 
+    /**
+     *
+     * @param s
+     * @return
+     */
     private boolean esNumero(String s) {
         return s != null && !s.trim().isEmpty() && s.trim().matches("\\d+");
     }
 
+    /**
+     *
+     * @param s
+     * @return
+     */
     private String texto(String s) {
         return (s == null) ? "" : s.trim();
     }

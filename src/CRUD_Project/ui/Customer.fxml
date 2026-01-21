@@ -8,77 +8,77 @@
             xmlns="http://javafx.com/javafx/8" 
             xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="CRUD_Project.ui.CustomerController">
-   <children>
+    <children>
    
-       <Label layoutX="20" layoutY="15" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Customers CRUD" />
+        <Label layoutX="20" layoutY="15" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Customers CRUD" />
    
-       <!-- ================= FORMULARIO ================= -->
+        <!-- ================= FORMULARIO ================= -->
    
-       <!-- Columna izquierda -->
-       <Label layoutX="20" layoutY="60" text="ID" />
-       <TextField fx:id="tfId" layoutX="140" layoutY="55" prefHeight="25.0" prefWidth="250.0" />
+        <!-- Columna izquierda -->
+        <Label layoutX="20" layoutY="60" text="ID" />
+        <TextField fx:id="tfId" layoutX="140" layoutY="55" prefHeight="25.0" prefWidth="250.0" />
    
-       <Label layoutX="20" layoutY="100" text="First Name *" />
-       <TextField fx:id="tfFirstName" layoutX="140" layoutY="95" prefWidth="250" />
+        <Label layoutX="20" layoutY="100" text="First Name *" />
+        <TextField fx:id="tfFirstName" layoutX="140" layoutY="95" prefWidth="250" />
    
-       <Label layoutX="20" layoutY="140" text="Last Name *" />
-       <TextField fx:id="tfLastName" layoutX="140" layoutY="135" prefWidth="250" />
+        <Label layoutX="20" layoutY="140" text="Last Name *" />
+        <TextField fx:id="tfLastName" layoutX="140" layoutY="135" prefWidth="250" />
    
-       <Label layoutX="20" layoutY="180" text="Middle Initial" />
-       <TextField fx:id="tfMiddleInitial" layoutX="140" layoutY="175" prefHeight="25.0" prefWidth="250.0" />
+        <Label layoutX="20" layoutY="180" text="Middle Initial" />
+        <TextField fx:id="tfMiddleInitial" layoutX="140" layoutY="175" prefHeight="25.0" prefWidth="250.0" />
    
-       <Label layoutX="20" layoutY="220" text="Email *" />
-       <TextField fx:id="tfEmail" layoutX="140" layoutY="215" prefWidth="250" />
+        <Label layoutX="20" layoutY="220" text="Email *" />
+        <TextField fx:id="tfEmail" layoutX="140" layoutY="215" prefWidth="250" />
    
-       <Label layoutX="20" layoutY="260" text="Password *" />
-       <PasswordField fx:id="pfPassword" layoutX="140" layoutY="255" prefWidth="250" />
+        <Label layoutX="20" layoutY="260" text="Password *" />
+        <PasswordField fx:id="pfPassword" layoutX="140" layoutY="255" prefWidth="250" />
    
-       <!-- Columna derecha -->
-       <Label layoutX="450" layoutY="100" text="Street *" />
-       <TextField fx:id="tfStreet" layoutX="560" layoutY="95" prefHeight="25.0" prefWidth="256.0" />
+        <!-- Columna derecha -->
+        <Label layoutX="450" layoutY="100" text="Street *" />
+        <TextField fx:id="tfStreet" layoutX="560" layoutY="95" prefHeight="25.0" prefWidth="256.0" />
    
-       <Label layoutX="450" layoutY="140" text="City *" />
-       <TextField fx:id="tfCity" layoutX="560" layoutY="135" prefHeight="25.0" prefWidth="256.0" />
+        <Label layoutX="450" layoutY="140" text="City *" />
+        <TextField fx:id="tfCity" layoutX="560" layoutY="135" prefHeight="25.0" prefWidth="256.0" />
    
-       <Label layoutX="450" layoutY="180" text="State *" />
-       <TextField fx:id="tfState" layoutX="560" layoutY="175" prefHeight="25.0" prefWidth="256.0" />
+        <Label layoutX="450" layoutY="180" text="State *" />
+        <TextField fx:id="tfState" layoutX="560" layoutY="175" prefHeight="25.0" prefWidth="256.0" />
    
-       <Label layoutX="450" layoutY="220" text="ZIP *" />
-       <TextField fx:id="tfZip" layoutX="560" layoutY="215" prefHeight="25.0" prefWidth="256.0" />
+        <Label layoutX="450" layoutY="220" text="ZIP *" />
+        <TextField fx:id="tfZip" layoutX="560" layoutY="215" prefHeight="25.0" prefWidth="256.0" />
    
-       <Label layoutX="450" layoutY="260" text="Phone *" />
-       <TextField fx:id="tfPhone" layoutX="560" layoutY="255" prefHeight="25.0" prefWidth="256.0" />
+        <Label layoutX="450" layoutY="260" text="Phone *" />
+        <TextField fx:id="tfPhone" layoutX="560" layoutY="255" prefHeight="25.0" prefWidth="256.0" />
    
-       <!-- ================= BOTONES ================= -->
+        <!-- ================= BOTONES ================= -->
    
-       <Button fx:id="btSearch" layoutX="140" layoutY="310" prefWidth="120" text="Search" />
-       <Button fx:id="btCreate" layoutX="270" layoutY="310" prefWidth="120" text="Create" />
-       <Button fx:id="btUpdate" layoutX="400" layoutY="310" prefWidth="120" text="Update" />
-       <Button fx:id="btDelete" layoutX="530" layoutY="310" prefWidth="120" text="Delete" />
+        <Button fx:id="btSearch" layoutX="140" layoutY="310" prefWidth="120" text="Search" />
+        <Button fx:id="btCreate" layoutX="270" layoutY="310" prefWidth="120" text="Create" />
+        <Button fx:id="btUpdate" layoutX="400" layoutY="310" prefWidth="120" text="Update" />
+        <Button fx:id="btDelete" layoutX="530" layoutY="310" prefWidth="120" text="Delete" />
    
-       <!-- ================= TABLA ================= -->
+        <!-- ================= TABLA ================= -->
    
-       <TableView fx:id="tvCustomers" layoutX="20.0" layoutY="370.0" prefHeight="350" prefWidth="1260">
+        <TableView fx:id="tvCustomers" layoutX="20.0" layoutY="370.0" prefHeight="350" prefWidth="1260">
    
-           <columns>
-               <TableColumn fx:id="colId" prefWidth="178.0" text="ID" />
-               <TableColumn fx:id="colFirstName" prefWidth="95.0" text="First Name" />
-               <TableColumn fx:id="colLastName" prefWidth="100.0" text="Last Name" />
-               <TableColumn fx:id="colMiddleInitial" prefWidth="35.0" text="MI" />
-               <TableColumn fx:id="colEmail" prefWidth="162.0" text="Email" />
-               <TableColumn fx:id="colStreet" prefWidth="220" text="Street" />
-               <TableColumn fx:id="colCity" prefWidth="120" text="City" />
-               <TableColumn fx:id="colState" prefWidth="80" text="State" />
-               <TableColumn fx:id="colZip" prefWidth="90.0" text="ZIP" />
-               <TableColumn fx:id="colPhone" prefWidth="167.0" text="Phone" />
-           </columns>
+            <columns>
+                <TableColumn fx:id="colId" prefWidth="178.0" text="ID" />
+                <TableColumn fx:id="colFirstName" prefWidth="95.0" text="First Name" />
+                <TableColumn fx:id="colLastName" prefWidth="100.0" text="Last Name" />
+                <TableColumn fx:id="colMiddleInitial" prefWidth="35.0" text="MI" />
+                <TableColumn fx:id="colEmail" prefWidth="162.0" text="Email" />
+                <TableColumn fx:id="colStreet" prefWidth="220" text="Street" />
+                <TableColumn fx:id="colCity" prefWidth="120" text="City" />
+                <TableColumn fx:id="colState" prefWidth="80" text="State" />
+                <TableColumn fx:id="colZip" prefWidth="90.0" text="ZIP" />
+                <TableColumn fx:id="colPhone" prefWidth="167.0" text="Phone" />
+            </columns>
    
-       </TableView>
+        </TableView>
    
-       <!-- ================= FOOTER ================= -->
+        <!-- ================= FOOTER ================= -->
    
-       <Button fx:id="btRefresh" layoutX="20" layoutY="740" text="Refresh" />
-       <Button fx:id="btExit" layoutX="1180" layoutY="740" text="Exit" />
-   </children>
+        <Button fx:id="btRefresh" layoutX="20" layoutY="740" text="Refresh" />
+        <Button fx:id="btExit" layoutX="1180" layoutY="740" text="Exit" />
+    </children>
 
 </AnchorPane>
