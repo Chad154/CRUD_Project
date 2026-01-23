@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * fields: account id, account type, account description, initial balance, initial balance date, 
  * current balance and credit limit. It also contains relational fields for getting
  * customers owning the account and movements or transactions made on the account.  
- * @author Javier Martín Uría
+ * @author Chad, Daniel e Imad
  */
 @XmlRootElement
 public class Account implements Serializable {

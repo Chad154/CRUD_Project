@@ -3,8 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package CRUD_Project;
-
+import CRUD_Project.ui.MovementController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,25 +12,21 @@ import javafx.stage.Stage;
 
 /**
  *
- * @author aitor
+ * @author imad
  */
 public class CRUD_Project extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
-        
+        // Carga directa de la vista
+        Parent root = FXMLLoader.load(getClass().getResource("/CRUD_Project/ui/Movement.fxml"));
         Scene scene = new Scene(root);
         
         stage.setScene(scene);
         stage.show();
     }
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         launch(args);
     }
-    
 }

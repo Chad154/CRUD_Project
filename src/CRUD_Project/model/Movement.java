@@ -14,7 +14,7 @@ import javax.xml.bind.annotation.XmlTransient;
  * Entity representing movements for accounts. It contains the following
  * fields: id, account id, description, movement timestamp, account balance after the
  * movement and amount of the movement. 
- * @author Javier Martín Uría
+ * @author Chad, Daniel e Imad
  */
 @XmlRootElement
 public class Movement implements Serializable {
