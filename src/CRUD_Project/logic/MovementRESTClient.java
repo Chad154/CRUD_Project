@@ -21,7 +21,7 @@ import javax.ws.rs.core.GenericType;
  *        client.close();
  * </pre>
  *
- * @author imad
+ * @author Chad, Daniel e Imad
  */
 public class MovementRESTClient {
 
