@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlTransient;
 /**
  * Entity representing bank customers. Contains personal data, identification 
  * data and relational data for accessing customer accounts data. 
- * @author Javier Martín Uría
+ * @author Chad, Daniel e Imad
  */
 @XmlRootElement
 public class Customer implements Serializable {

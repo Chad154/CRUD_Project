@@ -101,7 +101,7 @@ public class SignUPController {
             ventanaActual.close();
 
             // Cargar la ventana de Sign In
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("signin.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("Signin.fxml"));
             Parent root = loader.load();
 
             // Crear nueva ventana

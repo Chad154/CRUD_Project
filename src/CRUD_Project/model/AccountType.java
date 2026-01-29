@@ -7,7 +7,7 @@ package CRUD_Project.model;
 
 /**
  * Accounts types for Account instances: standard or credit type.
- * @author Javier Martín Uría
+ * @author Chad, Daniel e Imad
  */
 public enum AccountType {
     /**
