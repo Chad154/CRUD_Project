@@ -6,8 +6,10 @@
 package CRUD_Project.logic;
 
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 
 /**
  * Jersey REST client generated for REST resource:AccountFacadeREST
@@ -78,6 +80,11 @@ public class AccountRESTClient {
     }
 
     public <T> T findAll_XML(Class<T> responseType) throws ClientErrorException {
+        WebTarget resource = webTarget;
+        return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
+    }
+    
+    public <T> T findAll_XML(GenericType<T> responseType) throws WebApplicationException {
         WebTarget resource = webTarget;
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_XML).get(responseType);
     }

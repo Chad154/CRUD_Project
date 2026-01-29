@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane prefHeight="850.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CRUD_Project.ui.AccountController">
+   <children>
+      <fx:include fx:id="hBoxMenu" source="Menu.fxml" layoutX="0.0" layoutY="0.0"/>
+      <Label layoutX="144.0" layoutY="40.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Customer ID :" />
+
+      <TableView fx:id="tbAccounts" layoutX="50.0" layoutY="90.0" prefHeight="350.0" prefWidth="924.0">
+         <columns>
+            <TableColumn fx:id="tcAccountNumber" prefWidth="100.0" text="ID / Account" />
+            <TableColumn fx:id="tcDescription" prefWidth="200.0" text="Description" />
+            <TableColumn fx:id="tcType" prefWidth="100.0" text="Type" />
+            <TableColumn fx:id="tcCreditLine" prefWidth="100.0" text="Credit Line" />
+            <TableColumn fx:id="tcOpeningDate" prefWidth="120.0" text="Opening Date" />
+            <TableColumn fx:id="tcBeginBalance" prefWidth="120.0" text="Begin Balance" />
+            <TableColumn fx:id="tcBalance" prefWidth="183.0" text="Balance (€)" />
+         </columns>
+      </TableView>
+      
+      <Separator layoutX="50.0" layoutY="460.0" prefWidth="924.0" />
+      
+      <Label layoutX="50.0" layoutY="475.0" style="-fx-font-weight: bold; -fx-font-size: 14px;" text="Account Details Form" />
+      
+      <GridPane hgap="10.0" layoutX="50.0" layoutY="505.0" vgap="15.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="120.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="250.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="120.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="250.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label text="ID / Account Num:" />
+            <TextField fx:id="tfAccountNumber" promptText="Enter ID" GridPane.columnIndex="1" />
+            
+            <Label text="Description:" GridPane.rowIndex="1" />
+            <TextField fx:id="tfDescription" promptText="Enter description" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            
+            <Label text="Account Type:" GridPane.rowIndex="2" />
+            <ComboBox fx:id="cbType" prefWidth="250.0" promptText="Select Type" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            
+            <Label text="Credit Line:" GridPane.columnIndex="2" />
+            <TextField fx:id="tfCreditLine" promptText="0.00" GridPane.columnIndex="3" />
+            
+           
+            <Label text="Opening Date:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <DatePicker fx:id="dpOpeningDate" prefWidth="250.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+
+            <Label text="Begin balance" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <TextField fx:id="tfBeginBalance" promptText="0.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+
+            
+         </children>
+      </GridPane>
+
+      <HBox layoutX="50.0" layoutY="672.0" spacing="15.0">
+         <children>
+            <Button fx:id="btCreate" mnemonicParsing="false" prefHeight="30.0" prefWidth="120.0" text="Create Account" />
+            <Button fx:id="btUpdate" mnemonicParsing="false" prefHeight="30.0" prefWidth="120.0" text="Update Account" />
+            <Button fx:id="btDelete" mnemonicParsing="false" prefHeight="30.0" prefWidth="120.0" text="Delete Account" />
+            <Button fx:id="btViewMovements" mnemonicParsing="false" prefHeight="30.0" prefWidth="140.0" text="View Movements" />
+         </children>
+      </HBox>
+      
+      <HBox alignment="CENTER_RIGHT" layoutX="709.0" layoutY="675.0" spacing="10.0">
+         <children>
+            <Label style="-fx-font-weight: bold;" text="Total Balance:" />
+            <TextField fx:id="tfTotalBalance" editable="false" prefWidth="150.0" style="-fx-alignment: center-right;" />
+         </children>
+      </HBox>
+      <TextField layoutX="309.0" layoutY="40.0" />
+
+   </children>
+</Pane>
