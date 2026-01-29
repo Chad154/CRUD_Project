@@ -3,7 +3,9 @@ package CRUD_Project.ui;
 import CRUD_Project.model.Account;
 import CRUD_Project.model.AccountType; 
 import CRUD_Project.logic.AccountRESTClient;
-import CRUD_Project.ui.MovementController; // Asegúrate de importar esto
+import CRUD_Project.logic.MovementRESTClient;
+import CRUD_Project.model.Movement;
+import CRUD_Project.ui.MovementController;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -239,23 +241,64 @@ public class AccountController {
         }
     }
 
+    // (Opcional) Versión alternativa verificando antes
+    @FXML
     private void manejarEliminarCuenta() {
          Account seleccionada = tbAccounts.getSelectionModel().getSelectedItem();
-         if (seleccionada == null) return;
+         if (seleccionada == null) {
+             mostrarError("Selecciona una cuenta primero.");
+             return;
+         }
          
-         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Borrar cuenta?", ButtonType.YES, ButtonType.NO);
-         confirm.showAndWait();
-         if (confirm.getResult() == ButtonType.NO) return;
-
+         // 1. VERIFICACIÓN PREVIA (La solución robusta)
+         // Antes de intentar borrar, miramos si tiene movimientos.
+         MovementRESTClient movementClient = null;
          try {
-             restClient.removeAccount(String.valueOf(seleccionada.getId()));
-             mostrarInformacion("Eliminada");
-             limpiarFormulario();
-             cargarDatosDesdeServidor();
-         } catch (Exception e) { mostrarError(e.getMessage());}
+             movementClient = new MovementRESTClient();
+             GenericType<List<Movement>> listType = new GenericType<List<Movement>>() {};
+             
+             // Pedimos los movimientos de esa cuenta
+             List<Movement> movimientos = movementClient.findMovementByAccount_XML(listType, String.valueOf(seleccionada.getId()));
+             
+             // SI LA LISTA TIENE DATOS, PARAMOS TODO
+             if (movimientos != null && !movimientos.isEmpty()) {
+                 // Aquí mostramos la alerta específica que tú quieres
+                 mostrarError("No se puede eliminar la cuenta " + seleccionada.getId() + ".\n\n" +
+                              "MOTIVO: Tiene " + movimientos.size() + " movimientos asociados.\n" +
+                              "Debes eliminar los movimientos primero.");
+                 return; // Salimos del método sin intentar borrar nada
+             }
+             
+         } catch (Exception e) {
+             // Si falla la comprobación (ej. servidor caído), mostramos error pero podríamos dejar intentar borrar
+             LOGGER.severe("Error comprobando movimientos: " + e.getMessage());
+             mostrarError("Error de conexión al comprobar la cuenta.");
+             return;
+         } finally {
+             if (movementClient != null) movementClient.close();
+         }
+
+         // 2. CONFIRMACIÓN Y BORRADO
+         // Si llegamos aquí, es que NO tiene movimientos (lista vacía)
+         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Borrar la cuenta " + seleccionada.getId() + " permanentemente?", ButtonType.YES, ButtonType.NO);
+         confirm.showAndWait();
+         
+         if (confirm.getResult() == ButtonType.YES) {
+             try {
+                 restClient.removeAccount(String.valueOf(seleccionada.getId()));
+                 
+                 mostrarInformacion("Cuenta eliminada correctamente.");
+                 limpiarFormulario();
+                 cargarDatosDesdeServidor();
+                 
+             } catch (Exception e) {
+                 // Si falla aquí, es por otro motivo (conexión, permisos, etc.)
+                 mostrarError("Error inesperado al eliminar: " + e.getMessage());
+             }
+         }
     }
 
-    // --- MÉTODO OPTIMIZADO: PASO POR REFERENCIA ---
+    //MÉTODO OPTIMIZADO: PASO POR REFERENCIA
     @FXML
     private void manejarVerMovimientos() {
         Account seleccion = tbAccounts.getSelectionModel().getSelectedItem();

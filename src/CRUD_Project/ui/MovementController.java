@@ -21,6 +21,9 @@ import javax.ws.rs.core.GenericType;
 public class MovementController {
 
     private static final Logger LOGGER = Logger.getLogger("MovementController");
+    
+    // --- NUEVO: Límite máximo para evitar errores de precisión en Double ---
+    private static final double MAX_AMOUNT_LIMIT = 900_000_000.0; 
 
     @FXML private TableView<Movement> tvMovements;
     @FXML private TableColumn<Movement, Date> colDate;
@@ -88,14 +91,14 @@ public class MovementController {
     }
 
     // --- MÉTODO CLAVE: Evita datos obsoletos ---
-    // Usamos el find_XML que SÍ tiene ID para asegurar que leemos lo correcto
     private void actualizarSaldoDesdeServidor() {
         AccountRESTClient client = null;
         try {
             client = new AccountRESTClient();
             Account cuentaFresca = client.find_XML(Account.class, String.valueOf(this.account.getId()));
             if (cuentaFresca != null) {
-                this.account = cuentaFresca;
+                // IMPORTANTE: Solo actualizamos el saldo para no perder la info de crédito si el XML viene incompleto
+                this.account.setBalance(cuentaFresca.getBalance());
             }
         } catch (Exception e) {
             LOGGER.severe("Error sincronizando saldo: " + e.getMessage());
@@ -118,17 +121,20 @@ public class MovementController {
                 return;
             }
 
-            // 1. LEER DEL SERVIDOR (Evita usar saldo viejo si hubo un undo antes)
+            // --- NUEVO: VALIDACIÓN DE LÍMITE ---
+            if (amountInput > MAX_AMOUNT_LIMIT) {
+                mostrarError("La cantidad supera el límite permitido\n (900.000.000 €).");
+                return;
+            }
+
+            // 1. LEER DEL SERVIDOR
             actualizarSaldoDesdeServidor();
             double saldoBase = (account.getBalance() != null) ? account.getBalance() : 0.0;
             
-            // --- NUEVO: OBTENER LÍNEA DE CRÉDITO ---
+            // OBTENER LÍNEA DE CRÉDITO
             double lineaCredito = (account.getCreditLine() != null) ? account.getCreditLine() : 0.0;
 
             if ("PAYMENT".equals(cbType.getValue())) {
-                // LÓGICA DE CRÉDITO:
-                // Si tienes saldo 100 y crédito 1000, puedes gastar 1100.
-                // Si tienes saldo -500 y crédito 1000, te quedan 500 para gastar.
                 double fondosDisponibles = saldoBase + lineaCredito;
 
                 if (amountInput > fondosDisponibles) {
@@ -142,7 +148,7 @@ public class MovementController {
             // 2. CALCULAR
             Double nuevoSaldo = saldoBase + amountInput;
 
-            // 3. CREAR MOVIMIENTO (Con balance actualizado)
+            // 3. CREAR MOVIMIENTO
             Movement movement = new Movement();
             movement.setAmount(amountInput);
             movement.setDescription(cbType.getValue());
@@ -191,14 +197,14 @@ public class MovementController {
             AccountRESTClient accountClient = null;
             
             try {
-                // 1. LEER SALDO REAL ACTUAL (Ej: Tienes 90)
+                // 1. LEER SALDO REAL ACTUAL
                 actualizarSaldoDesdeServidor();
                 Double saldoActual = (this.account.getBalance() != null) ? this.account.getBalance() : 0.0;
                 
-                // 2. REVERTIR LA OPERACIÓN (Ej: 90 - (-10) = 100)
+                // 2. REVERTIR LA OPERACIÓN
                 Double saldoRestaurado = saldoActual - lastMovement.getAmount();
 
-                // 3. ACTUALIZAR CUENTA PRIMERO (Guardamos el 100)
+                // 3. ACTUALIZAR CUENTA PRIMERO
                 this.account.setBalance(saldoRestaurado);
                 accountClient = new AccountRESTClient();
                 accountClient.updateAccount_XML(this.account);
@@ -210,9 +216,6 @@ public class MovementController {
                 // 5. BLOQUEAR Y REFRESCAR
                 bUndoLastMovement.setDisable(true);
                 loadMovements();
-                
-                // NOTA: La próxima vez que entres a handleCreateMovement, 
-                // actualizarSaldoDesdeServidor leerá el 100 que acabamos de guardar.
                 
             } catch (Exception e) {
                 mostrarError("Error al deshacer movimiento.");
