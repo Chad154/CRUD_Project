@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+      prefHeight="30.0" prefWidth="1024.0" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="CRUD_Project.ui.MenuController">
+   <children>
+      <MenuBar fx:id="menuBar" prefHeight="30.0" prefWidth="1024.0">
+        <menus>
+          <Menu fx:id="menuActions" mnemonicParsing="false" text="Actions">
+            <items>
+              <MenuItem fx:id="miViewMovements" mnemonicParsing="false" text="View Movements" />
+              
+              <SeparatorMenuItem mnemonicParsing="false" />
+              
+              <MenuItem fx:id="miLogOut" mnemonicParsing="false" onAction="#handleLogOut" text="Log Out" />
+            </items>
+          </Menu> 
+          <Menu fx:id="menuHelp" mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem fx:id="menuHelpItem" mnemonicParsing="false" onAction="#handleHelpAction" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </children>
+</HBox>  

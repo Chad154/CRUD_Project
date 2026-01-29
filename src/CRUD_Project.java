@@ -19,7 +19,7 @@ public class CRUD_Project extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         // Carga directa de la vista
-        Parent root = FXMLLoader.load(getClass().getResource("/CRUD_Project/ui/Movement.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/CRUD_Project/ui/account.fxml"));
         Scene scene = new Scene(root);
         
         stage.setScene(scene);
