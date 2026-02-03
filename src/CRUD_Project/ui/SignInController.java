@@ -48,10 +48,14 @@ public class SignInController {
 
     private static final Logger LOGGER = Logger.getLogger("proyectosignup.signup.ui");
 
-    public void init(Stage stage) {
-        LOGGER.info("Initializing window.");
+    // --- CAMBIO CLAVE: USAR initialize() ---
+    // Este método lo llama JavaFX automáticamente al cargar el FXML.
+    // Así los botones siempre funcionarán, vengas del Main o del LogOut.
+    @FXML
+    public void initialize() {
+        LOGGER.info("Initializing SignIn window (Automatic).");
 
-        // solo listeners y lógica
+        // Listeners y lógica
         bExit.setOnAction(this::handlebExitMethod);
         bLogIn.setOnAction(this::handlebLogInMethod);
         Hipervinculo.setOnAction(this::handleHiperVinculoMethod);
@@ -66,9 +70,15 @@ public class SignInController {
         bLogIn.setDefaultButton(true);
     }
 
+    // Mantenemos este método vacío para compatibilidad con tu Main (CRUD_Project.java)
+    // para que no te de error de compilación, pero ya no hace falta que haga nada.
+    public void init(Stage stage) {
+        // Ya se ha inicializado en el método initialize() de arriba.
+        // Puedes dejarlo vacío o usarlo si necesitas configurar algo específico del Stage (título, icono).
+    }
+
     public void init(Stage stage, Parent root) {
-        // no usar root, solo mantener compatibilidad
-        init(stage);
+        // Compatibilidad
     }
 
     //hipervinculo, inicia la ventana signup y cierra signin
@@ -103,7 +113,7 @@ public class SignInController {
         Platform.exit();
     }
 
-    //cierra signin y abre la ventana changepassword
+    // INICIO DE SESIÓN
     private void handlebLogInMethod(ActionEvent event) {
         try {
             String user = tfUsername.getText().trim();
@@ -125,24 +135,27 @@ public class SignInController {
                 return;
             }
 
-            // ===== LOGIN ADMIN (sin BD) =====
+            // ===== LOGIN ADMIN (TEMPORAL - va a Accounts para probar) =====
             if (user.equalsIgnoreCase("admin") && pass.equals("admin")) {
 
-                // Cargar Customer.fxml y cambiar la escena en el mismo Stage
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("Customer.fxml"));
+                // Crear un Customer dummy para testing
+                Customer dummyCustomer = new Customer();
+                dummyCustomer.setId(1L);
+                dummyCustomer.setFirstName("Admin");
+                dummyCustomer.setEmail("admin@test.com");
+
+                // Cargar Account.fxml en lugar de Customer.fxml
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/CRUD_Project/ui/account.fxml"));
                 Parent root = loader.load();
 
                 Stage currentStage = (Stage) bLogIn.getScene().getWindow();
-                Scene newScene = new Scene(root);
-                currentStage.setScene(newScene);
-                currentStage.setTitle("Customers CRUD");
+                currentStage.setScene(new Scene(root));
                 currentStage.show();
 
-                // Si tu CustomerController usa init(Stage) lo llamas aquí
-                CustomerController controller = loader.getController();
-                controller.init(currentStage);
+                AccountController controller = loader.getController();
+                controller.initData(currentStage, dummyCustomer);
 
-                return; // importante: no seguir con login normal
+                return; 
             }
 
             // ===== LOGIN NORMAL (con BD) =====
@@ -154,15 +167,21 @@ public class SignInController {
             );
             resCustomer.close();
 
-            // Tu flujo normal
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("accounts.fxml"));
+            // ABRIR LA VENTANA DE CUENTAS
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CRUD_Project/ui/account.fxml"));
             Parent root = loader.load();
 
-            ChangeController controller = loader.getController();
-            controller.setCustomer(customer);
-
+            AccountController controller = loader.getController();
+            
+            // Obtenemos el Stage actual
             Stage currentStage = (Stage) bLogIn.getScene().getWindow();
-            controller.init(currentStage, root);
+            
+            // Cambiamos la escena
+            currentStage.setScene(new Scene(root));
+            currentStage.show();
+
+            // PASAMOS EL USUARIO LOGUEADO
+            controller.initData(currentStage, customer);
 
         } catch (InternalServerErrorException e) {
             LOGGER.warning(e.getLocalizedMessage());
@@ -178,6 +197,7 @@ public class SignInController {
 
         } catch (Exception e) {
             LOGGER.warning(e.getLocalizedMessage());
+            e.printStackTrace();
             new Alert(AlertType.INFORMATION,
                     "ERROR inesperado, pruebe mas tarde")
                     .showAndWait();
@@ -185,17 +205,8 @@ public class SignInController {
     }
 
     //campos--------------------
-    /**
-     *
-     * @param observable
-     * @param oldValue
-     * @param newValue
-     */
-    //username
     private void handletfUsernameTextChange(ObservableValue observable, String oldValue, String newValue) {
         try {
-
-            //Quitar borde rojo si el usuario escribe algo
             if (!newValue.trim().isEmpty()) {
                 tfUsername.setStyle(null);
             }
@@ -213,14 +224,8 @@ public class SignInController {
         }
     }
 
-    /**
-     *
-     * @param observable
-     * @param oldValue
-     * @param newValue
-     */
     private void handletfUsernameFocusChange(ObservableValue observable, Boolean oldValue, Boolean newValue) {
-        if (newValue) {//si NewValue es true estas ganando el foco, y en else seria la perdida,y viceversa.  !oldValue, si lo niego, quiere decir q si era false,no estaba enfocado
+        if (newValue) {
             LOGGER.info("onFocus");
             tfUsername.requestFocus();
         } else if (oldValue) {
@@ -228,17 +233,8 @@ public class SignInController {
         }
     }
 
-    /**
-     *
-     * @param observable
-     * @param oldValue
-     * @param newValue
-     */
-    //password
     private void handleftPasswordTextChange(ObservableValue observable, String oldValue, String newValue) {
         try {
-
-            //Quitar borde rojo si el usuario escribe algo
             if (!newValue.trim().isEmpty()) {
                 pfPassword.setStyle(null);
             }
@@ -256,12 +252,6 @@ public class SignInController {
         }
     }
 
-    /**
-     *
-     * @param observable
-     * @param oldValue
-     * @param newValue
-     */
     private void handletfPasswordFocusChange(ObservableValue observable, Boolean oldValue, Boolean newValue) {
         if (newValue) {
             LOGGER.info("onFocus");
@@ -270,5 +260,4 @@ public class SignInController {
             LOGGER.info("onBlur");
         }
     }
-
 }
