@@ -20,9 +20,10 @@ import javafx.stage.WindowEvent;
 import javax.ws.rs.core.GenericType;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.HashSet; // Import necesario para la relación
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;     // Import necesario para la relación
+import java.util.Random; 
+import java.util.Set;     
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
@@ -57,6 +58,8 @@ public class AccountController {
     @FXML private Button btViewMovements;
     @FXML private TextField tfTotalBalance;
     
+    @FXML private TextField tfCustomerId; 
+    
     @FXML private MenuController hBoxMenuController;
 
     private Stage stage;
@@ -64,7 +67,6 @@ public class AccountController {
     private ObservableList<Account> accountsData;
     private final Logger LOGGER = Logger.getLogger(AccountController.class.getName());
 
-    // --- NUEVA VARIABLE: Para guardar el usuario logueado ---
     private Customer user;
     
     public void setStage(Stage stage) {
@@ -73,26 +75,37 @@ public class AccountController {
 
     @FXML
     public void initialize() {
-        // 1. Cliente REST
         try {
             restClient = new AccountRESTClient();
         } catch (Exception e) {
             LOGGER.severe("No se pudo conectar con el servidor: " + e.getMessage());
         }
 
-        // 2. Menú
-        if (hBoxMenuController != null && hBoxMenuController.getViewChange() != null) {
-            hBoxMenuController.getViewChange().setOnAction(e -> manejarVerMovimientos());
+        if (hBoxMenuController != null) {
+            hBoxMenuController.setLinkedButton(btViewMovements);
         }
 
-        // 3. ComboBox
         try {
             cbType.setItems(FXCollections.observableArrayList(AccountType.values()));
         } catch (Exception e) {
             LOGGER.severe("Error types: " + e.getMessage());
         }
 
-        // 4. Configurar Columnas
+        // --- NUEVO: Listener para controlar el Credit Line ---
+        cbType.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                // Asumo que el enum se llama STANDARD (ajústalo si es Standard o similar)
+                if (newVal.toString().equalsIgnoreCase("STANDARD")) {
+                    tfCreditLine.setText("0.0");
+                    tfCreditLine.setDisable(true); // Se bloquea
+                } else {
+                    // Si es CREDIT (o cualquier otro), se habilita
+                    tfCreditLine.setDisable(false); 
+                }
+            }
+        });
+        // ----------------------------------------------------
+
         tcAccountNumber.setCellValueFactory(new PropertyValueFactory<>("id"));
         tcDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
         tcType.setCellValueFactory(new PropertyValueFactory<>("type"));
@@ -100,7 +113,6 @@ public class AccountController {
         tcBeginBalance.setCellValueFactory(new PropertyValueFactory<>("beginBalance"));
         tcOpeningDate.setCellValueFactory(new PropertyValueFactory<>("beginBalanceTimestamp"));
 
-        // --- COLUMNA BALANCE (Robusta) ---
         tcBalance.setCellValueFactory(cellData -> 
              new SimpleObjectProperty<>(cellData.getValue().getBalance())
         );
@@ -116,7 +128,6 @@ public class AccountController {
             }
         });
 
-        // 5. Lista y Listener
         accountsData = FXCollections.observableArrayList();
         tbAccounts.setItems(accountsData);
 
@@ -130,14 +141,10 @@ public class AccountController {
             }
         });
 
-        // 6. Botones
         btCreate.setOnAction(this::manejarCrearCuenta);
         btUpdate.setOnAction(e -> manejarActualizarCuenta());
         btDelete.setOnAction(e -> manejarEliminarCuenta());
         btViewMovements.setOnAction(e -> manejarVerMovimientos());
-        
-        // NOTA: He quitado cargarDatosDesdeServidor() de aquí.
-        // Se llamará en initData cuando ya tengamos el usuario.
     }
 
     // Método para inicializar el Stage (si se llama manualmente desde Main)
@@ -149,35 +156,41 @@ public class AccountController {
             stage.setResizable(false);
             stage.setOnCloseRequest(this::manejarCierreVentana);
             
-            // Solo carga si tenemos usuario (por seguridad)
             if (this.user != null) {
                 cargarDatosDesdeServidor();
             }
+            habilitarModoCreacion();
+            
             stage.show();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error initStage", e);
         }
     }
 
-    // --- NUEVO MÉTODO IMPLEMENTADO ---
-    // Este método es llamado por SignInController
     public void initData(Stage currentStage, Customer loggedCustomer) {
         this.stage = currentStage;
-        this.user = loggedCustomer; // Guardamos el usuario
+        this.user = loggedCustomer; 
         
-        // Configuraciones visuales extras
         if (this.user != null) {
             this.stage.setTitle("Cuentas de: " + user.getFirstName() + " " + user.getLastName());
-            // IMPORTANTE: Ahora que tenemos usuario, cargamos SUS datos
+            if (tfCustomerId != null) {
+                tfCustomerId.setText(String.valueOf(user.getId()));
+            }
             cargarDatosDesdeServidor();
         }
     }
 
-    // --- MÉTODOS DE FORMULARIO ---
+    private Long generarIdUnico() {
+        Random random = new Random();
+        long min = 1_000_000_000L;
+        long max = 9_999_999_999L;
+        return min + (long)(random.nextDouble() * (max - min));
+    }
+
     private void cargarDatosEnFormulario(Account account) {
         tfAccountNumber.setText(String.valueOf(account.getId()));
         tfDescription.setText(account.getDescription());
-        cbType.getSelectionModel().select(account.getType());
+        cbType.getSelectionModel().select(account.getType()); // Esto disparará el listener automáticamente
         tfCreditLine.setText(String.valueOf(account.getCreditLine()));
         
         tfBeginBalance.setText(account.getBeginBalance() != null ? String.valueOf(account.getBeginBalance()) : "0.0");
@@ -197,27 +210,44 @@ public class AccountController {
         if (tfBeginBalance != null) tfBeginBalance.setDisable(true); 
 
         tfDescription.setDisable(false);
-        tfCreditLine.setDisable(false);
+        
+        // CORRECCIÓN: Respetamos la lógica del tipo de cuenta
+        AccountType tipo = cbType.getValue();
+        if (tipo != null && tipo.toString().equalsIgnoreCase("STANDARD")) {
+            tfCreditLine.setDisable(true);
+        } else {
+            tfCreditLine.setDisable(false);
+        }
+
         btCreate.setDisable(true);
         btUpdate.setDisable(false);
         btDelete.setDisable(false);
     }
     
     private void habilitarModoCreacion() {
-        tfAccountNumber.setDisable(false);
+        tfAccountNumber.setText(String.valueOf(generarIdUnico()));
+        tfAccountNumber.setDisable(true); 
+        
         cbType.setDisable(false);
         dpOpeningDate.setDisable(false);
         if (tfBeginBalance != null) tfBeginBalance.setDisable(false);
 
         tfDescription.setDisable(false);
-        tfCreditLine.setDisable(false);
+        
+        // CORRECCIÓN: Respetamos la lógica al limpiar
+        AccountType tipo = cbType.getValue();
+        if (tipo != null && tipo.toString().equalsIgnoreCase("STANDARD")) {
+            tfCreditLine.setDisable(true);
+        } else {
+            tfCreditLine.setDisable(false);
+        }
+
         btCreate.setDisable(false);
         btUpdate.setDisable(true);
         btDelete.setDisable(true);
     }
     
     private void limpiarFormulario() {
-        tfAccountNumber.clear();
         tfDescription.clear();
         cbType.getSelectionModel().clearSelection();
         tfCreditLine.clear();
@@ -229,38 +259,57 @@ public class AccountController {
     @FXML
     private void manejarCrearCuenta(ActionEvent event) {
          try {
-            Account nuevaCuenta = new Account();
-            if (!tfAccountNumber.getText().isEmpty()) 
-                nuevaCuenta.setId(Long.parseLong(tfAccountNumber.getText()));
-            // Sugerencia: Si está vacío, podrías generar ID automático aquí:
-            // else nuevaCuenta.setId(System.currentTimeMillis());
+            if (tfDescription.getText().isEmpty() || 
+                tfCreditLine.getText().isEmpty() || tfBeginBalance.getText().isEmpty() || 
+                cbType.getSelectionModel().getSelectedItem() == null) {
+                
+                mostrarError("Por favor, rellena todos los campos.");
+                return;
+            }
 
+            Long idAutomatico = Long.parseLong(tfAccountNumber.getText());
+
+            Account nuevaCuenta = new Account();
+            nuevaCuenta.setId(idAutomatico);
             nuevaCuenta.setDescription(tfDescription.getText());
             nuevaCuenta.setType(cbType.getSelectionModel().getSelectedItem());
-            nuevaCuenta.setCreditLine(!tfCreditLine.getText().isEmpty() ? Double.parseDouble(tfCreditLine.getText()) : 0.0);
             
-            Double saldo = (tfBeginBalance != null && !tfBeginBalance.getText().isEmpty()) ? Double.parseDouble(tfBeginBalance.getText()) : 0.0;
-            nuevaCuenta.setBeginBalance(saldo);
-            nuevaCuenta.setBalance(saldo); 
+            try {
+                nuevaCuenta.setCreditLine(Double.parseDouble(tfCreditLine.getText()));
+                Double saldo = Double.parseDouble(tfBeginBalance.getText());
+                nuevaCuenta.setBeginBalance(saldo);
+                nuevaCuenta.setBalance(saldo);
+            } catch (NumberFormatException nfe) {
+                mostrarError("El saldo y crédito deben ser valores numéricos.");
+                return;
+            }
+            
             nuevaCuenta.setBeginBalanceTimestamp(new Date());
 
-            // --- CAMBIO CLAVE: Relacionar con el Usuario Logueado ---
             if (this.user != null) {
                 Set<Customer> customers = new HashSet<>();
                 customers.add(this.user);
-                nuevaCuenta.setCustomers(customers); // Asignamos el dueño
+                nuevaCuenta.setCustomers(customers); 
             } else {
-                mostrarError("Error: No hay usuario logueado. Reinicia la sesión.");
+                mostrarError("Error crítico: No hay usuario logueado. Reinicia la sesión.");
                 return;
             }
 
             restClient.createAccount_XML(nuevaCuenta);
-            mostrarInformacion("Cuenta Creada");
+            
+            mostrarInformacion("Cuenta creada con ID Automático: " + idAutomatico);
             limpiarFormulario();
+            habilitarModoCreacion(); 
             cargarDatosDesdeServidor();
+            
+        } catch (javax.ws.rs.ClientErrorException e) {
+            LOGGER.severe("Error REST: " + e.getMessage());
+            mostrarError("Error al guardar. Inténtalo de nuevo.");
+            habilitarModoCreacion(); 
+            
         } catch (Exception e) { 
-            e.printStackTrace();
-            mostrarError("Error al crear: " + e.getMessage()); 
+            LOGGER.severe("Error general: " + e.getMessage());
+            mostrarError("Error inesperado: " + e.getMessage()); 
         }
     }
 
@@ -272,11 +321,11 @@ public class AccountController {
             if (!tfCreditLine.getText().isEmpty()) {
                 seleccionada.setCreditLine(Double.parseDouble(tfCreditLine.getText()));
             }
-            // NO TOCAMOS EL BALANCE AQUI
             restClient.updateAccount_XML(seleccionada);
             mostrarInformacion("Actualizada");
             tbAccounts.refresh(); 
             limpiarFormulario();
+            habilitarModoCreacion();
         } catch(Exception e) {
             mostrarError("Error: " + e.getMessage());
         }
@@ -294,20 +343,15 @@ public class AccountController {
          try {
              movementClient = new MovementRESTClient();
              GenericType<List<Movement>> listType = new GenericType<List<Movement>>() {};
-             
              List<Movement> movimientos = movementClient.findMovementByAccount_XML(listType, String.valueOf(seleccionada.getId()));
              
              if (movimientos != null && !movimientos.isEmpty()) {
-                 mostrarError("No se puede eliminar la cuenta " + seleccionada.getId() + ".\n\n" +
-                              "MOTIVO: Tiene " + movimientos.size() + " movimientos asociados.\n" +
-                              "Debes eliminar los movimientos primero.");
+                 mostrarError("No se puede eliminar: Tiene movimientos asociados.");
                  return; 
              }
              
          } catch (Exception e) {
              LOGGER.severe("Error comprobando movimientos: " + e.getMessage());
-             mostrarError("Error de conexión al comprobar la cuenta.");
-             return;
          } finally {
              if (movementClient != null) movementClient.close();
          }
@@ -318,11 +362,12 @@ public class AccountController {
          if (confirm.getResult() == ButtonType.YES) {
              try {
                  restClient.removeAccount(String.valueOf(seleccionada.getId()));
-                 mostrarInformacion("Cuenta eliminada correctamente.");
+                 mostrarInformacion("Cuenta eliminada.");
                  limpiarFormulario();
+                 habilitarModoCreacion(); 
                  cargarDatosDesdeServidor();
              } catch (Exception e) {
-                 mostrarError("Error inesperado al eliminar: " + e.getMessage());
+                 mostrarError("Error al eliminar: " + e.getMessage());
              }
          }
     }
@@ -334,7 +379,6 @@ public class AccountController {
             mostrarError("Selecciona una cuenta primero.");
             return;
         }
-
         try {
             String ruta = "/CRUD_Project/ui/Movement.fxml"; 
             java.net.URL url = getClass().getResource(ruta);
@@ -351,13 +395,12 @@ public class AccountController {
             modalStage.setScene(new Scene(root));
             modalStage.setTitle("Movimientos de: " + seleccion.getId());
             modalStage.initModality(Modality.APPLICATION_MODAL);
-            
             modalStage.showAndWait();
             
             cargarDatosDesdeServidor(); 
-            
             tbAccounts.getSelectionModel().clearSelection();
             limpiarFormulario();
+            habilitarModoCreacion();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -367,12 +410,10 @@ public class AccountController {
     
     // --- CAMBIO CLAVE: Cargar solo datos del usuario ---
     private void cargarDatosDesdeServidor() {
-        if (this.user == null) return; // Seguridad
+        if (this.user == null) return; 
 
         try {
             GenericType<List<Account>> listType = new GenericType<List<Account>>() {};
-            
-            // Usamos findAccountsByCustomerId en vez de findAll
             List<Account> cuentas = restClient.findAccountsByCustomerId_XML(
                     listType, 
                     String.valueOf(this.user.getId())

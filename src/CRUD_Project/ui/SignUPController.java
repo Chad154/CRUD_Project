@@ -94,29 +94,35 @@ public class SignUPController {
     // Aqui esta todo el codigo sobre el funcionamiento de los botones
     
     //Metodo para el funcionamiento al pulsar el boton de exit
+    @FXML
     private void handlebExitMethod(ActionEvent event) {
         try {
-            // Cerrar la ventana actual
+            // 1. Obtener la ventana actual (Sign Up) y cerrarla
             Stage ventanaActual = (Stage) btExit.getScene().getWindow();
             ventanaActual.close();
 
-            // Cargar la ventana de Sign In
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("Signin.fxml"));
+            // 2. Cargar el FXML de Sign In
+            // Asegúrate de que el nombre del archivo sea exacto (ej: SignIn.fxml con I mayúscula o minúscula)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CRUD_Project/ui/SignIn.fxml"));
             Parent root = loader.load();
 
-            // Crear nueva ventana
-            Stage nuevaVentana = new Stage();
-            nuevaVentana.setTitle("Sign In");
-
-            // Inicializar su controlador (EL init ya se encarga de crear la Scene)
+            // 3. Crear la nueva ventana
+            Stage stageSignIn = new Stage();
+            
+            // 4. Obtener el controlador y llamar a init con UN SOLO parámetro
             SignInController controller = loader.getController();
-            controller.init(nuevaVentana, root);
+            controller.init(stageSignIn); // Cambiado: Solo pasamos el stage
 
-            // Mostrarla (ya se hace dentro del init, pero si no, puedes dejarlo igual)
-            nuevaVentana.show();
+            // 5. Configurar la escena y mostrar
+            Scene scene = new Scene(root);
+            stageSignIn.setScene(scene);
+            stageSignIn.setTitle("Sign In");
+            stageSignIn.setResizable(false);
+            stageSignIn.show();
 
         } catch (IOException e) {
             LOGGER.severe("Error al abrir la ventana de Sign In: " + e.getMessage());
+            e.printStackTrace(); // Útil para ver el error exacto en la consola
             new Alert(Alert.AlertType.ERROR, "Error al cargar la ventana de inicio de sesión").showAndWait();
         }
     }

@@ -520,9 +520,30 @@ public class CustomerController {
      *
      */
     private void cerrar() {
-        Stage ventanaActual = (Stage) btExit.getScene().getWindow();
-        ventanaActual.close();
+    try {
+        // 1. Cargamos el archivo físico
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/CRUD_Project/ui/SignIn.fxml"));
+        Parent root = loader.load();
+
+        // 2. Obtenemos el controlador y lo despertamos
+        SignInController controller = loader.getController();
+        
+        // 3. Reutilizamos el Stage actual
+        Stage currentStage = (Stage) btExit.getScene().getWindow();
+        
+        // 4. Inicializamos la lógica del Login
+        controller.init(currentStage);
+
+        // 5. Cambiamos lo que ve el usuario
+        currentStage.setScene(new Scene(root));
+        currentStage.show();
+
+    } catch (IOException e) {
+        // Si el archivo no existe o la ruta está mal, entrará aquí
+        LOGGER.severe("Error al cargar la vista de Login: " + e.getMessage());
+        mostrarError("Error de Navegación", "No se pudo encontrar la ventana de inicio de sesión.");
     }
+}
 
     /**
      *
