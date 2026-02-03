@@ -155,7 +155,7 @@ public class SignInController {
             resCustomer.close();
 
             // Tu flujo normal
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("CambioContraseña.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("accounts.fxml"));
             Parent root = loader.load();
 
             ChangeController controller = loader.getController();
