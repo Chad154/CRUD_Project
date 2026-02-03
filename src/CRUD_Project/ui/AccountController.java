@@ -4,6 +4,7 @@ import CRUD_Project.model.Account;
 import CRUD_Project.model.AccountType; 
 import CRUD_Project.logic.AccountRESTClient;
 import CRUD_Project.logic.MovementRESTClient;
+import CRUD_Project.model.Customer;
 import CRUD_Project.model.Movement;
 import CRUD_Project.ui.MovementController;
 
@@ -19,7 +20,9 @@ import javafx.stage.WindowEvent;
 import javax.ws.rs.core.GenericType;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashSet; // Import necesario para la relación
 import java.util.List;
+import java.util.Set;     // Import necesario para la relación
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
@@ -60,6 +63,9 @@ public class AccountController {
     private AccountRESTClient restClient;
     private ObservableList<Account> accountsData;
     private final Logger LOGGER = Logger.getLogger(AccountController.class.getName());
+
+    // --- NUEVA VARIABLE: Para guardar el usuario logueado ---
+    private Customer user;
     
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -130,9 +136,11 @@ public class AccountController {
         btDelete.setOnAction(e -> manejarEliminarCuenta());
         btViewMovements.setOnAction(e -> manejarVerMovimientos());
         
-        cargarDatosDesdeServidor();
+        // NOTA: He quitado cargarDatosDesdeServidor() de aquí.
+        // Se llamará en initData cuando ya tengamos el usuario.
     }
 
+    // Método para inicializar el Stage (si se llama manualmente desde Main)
     public void initStage(Parent root) {
         try {
             Scene scene = new Scene(root);
@@ -141,10 +149,27 @@ public class AccountController {
             stage.setResizable(false);
             stage.setOnCloseRequest(this::manejarCierreVentana);
             
-            cargarDatosDesdeServidor();
+            // Solo carga si tenemos usuario (por seguridad)
+            if (this.user != null) {
+                cargarDatosDesdeServidor();
+            }
             stage.show();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error initStage", e);
+        }
+    }
+
+    // --- NUEVO MÉTODO IMPLEMENTADO ---
+    // Este método es llamado por SignInController
+    public void initData(Stage currentStage, Customer loggedCustomer) {
+        this.stage = currentStage;
+        this.user = loggedCustomer; // Guardamos el usuario
+        
+        // Configuraciones visuales extras
+        if (this.user != null) {
+            this.stage.setTitle("Cuentas de: " + user.getFirstName() + " " + user.getLastName());
+            // IMPORTANTE: Ahora que tenemos usuario, cargamos SUS datos
+            cargarDatosDesdeServidor();
         }
     }
 
@@ -207,6 +232,9 @@ public class AccountController {
             Account nuevaCuenta = new Account();
             if (!tfAccountNumber.getText().isEmpty()) 
                 nuevaCuenta.setId(Long.parseLong(tfAccountNumber.getText()));
+            // Sugerencia: Si está vacío, podrías generar ID automático aquí:
+            // else nuevaCuenta.setId(System.currentTimeMillis());
+
             nuevaCuenta.setDescription(tfDescription.getText());
             nuevaCuenta.setType(cbType.getSelectionModel().getSelectedItem());
             nuevaCuenta.setCreditLine(!tfCreditLine.getText().isEmpty() ? Double.parseDouble(tfCreditLine.getText()) : 0.0);
@@ -216,11 +244,24 @@ public class AccountController {
             nuevaCuenta.setBalance(saldo); 
             nuevaCuenta.setBeginBalanceTimestamp(new Date());
 
+            // --- CAMBIO CLAVE: Relacionar con el Usuario Logueado ---
+            if (this.user != null) {
+                Set<Customer> customers = new HashSet<>();
+                customers.add(this.user);
+                nuevaCuenta.setCustomers(customers); // Asignamos el dueño
+            } else {
+                mostrarError("Error: No hay usuario logueado. Reinicia la sesión.");
+                return;
+            }
+
             restClient.createAccount_XML(nuevaCuenta);
             mostrarInformacion("Cuenta Creada");
             limpiarFormulario();
             cargarDatosDesdeServidor();
-        } catch (Exception e) { mostrarError("Error: " + e.getMessage()); }
+        } catch (Exception e) { 
+            e.printStackTrace();
+            mostrarError("Error al crear: " + e.getMessage()); 
+        }
     }
 
     private void manejarActualizarCuenta() {
@@ -234,14 +275,13 @@ public class AccountController {
             // NO TOCAMOS EL BALANCE AQUI
             restClient.updateAccount_XML(seleccionada);
             mostrarInformacion("Actualizada");
-            tbAccounts.refresh(); // Refrescar visualmente
+            tbAccounts.refresh(); 
             limpiarFormulario();
         } catch(Exception e) {
             mostrarError("Error: " + e.getMessage());
         }
     }
 
-    // (Opcional) Versión alternativa verificando antes
     @FXML
     private void manejarEliminarCuenta() {
          Account seleccionada = tbAccounts.getSelectionModel().getSelectedItem();
@@ -250,27 +290,21 @@ public class AccountController {
              return;
          }
          
-         // 1. VERIFICACIÓN PREVIA (La solución robusta)
-         // Antes de intentar borrar, miramos si tiene movimientos.
          MovementRESTClient movementClient = null;
          try {
              movementClient = new MovementRESTClient();
              GenericType<List<Movement>> listType = new GenericType<List<Movement>>() {};
              
-             // Pedimos los movimientos de esa cuenta
              List<Movement> movimientos = movementClient.findMovementByAccount_XML(listType, String.valueOf(seleccionada.getId()));
              
-             // SI LA LISTA TIENE DATOS, PARAMOS TODO
              if (movimientos != null && !movimientos.isEmpty()) {
-                 // Aquí mostramos la alerta específica que tú quieres
                  mostrarError("No se puede eliminar la cuenta " + seleccionada.getId() + ".\n\n" +
                               "MOTIVO: Tiene " + movimientos.size() + " movimientos asociados.\n" +
                               "Debes eliminar los movimientos primero.");
-                 return; // Salimos del método sin intentar borrar nada
+                 return; 
              }
              
          } catch (Exception e) {
-             // Si falla la comprobación (ej. servidor caído), mostramos error pero podríamos dejar intentar borrar
              LOGGER.severe("Error comprobando movimientos: " + e.getMessage());
              mostrarError("Error de conexión al comprobar la cuenta.");
              return;
@@ -278,27 +312,21 @@ public class AccountController {
              if (movementClient != null) movementClient.close();
          }
 
-         // 2. CONFIRMACIÓN Y BORRADO
-         // Si llegamos aquí, es que NO tiene movimientos (lista vacía)
          Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Borrar la cuenta " + seleccionada.getId() + " permanentemente?", ButtonType.YES, ButtonType.NO);
          confirm.showAndWait();
          
          if (confirm.getResult() == ButtonType.YES) {
              try {
                  restClient.removeAccount(String.valueOf(seleccionada.getId()));
-                 
                  mostrarInformacion("Cuenta eliminada correctamente.");
                  limpiarFormulario();
                  cargarDatosDesdeServidor();
-                 
              } catch (Exception e) {
-                 // Si falla aquí, es por otro motivo (conexión, permisos, etc.)
                  mostrarError("Error inesperado al eliminar: " + e.getMessage());
              }
          }
     }
 
-    //MÉTODO OPTIMIZADO: PASO POR REFERENCIA
     @FXML
     private void manejarVerMovimientos() {
         Account seleccion = tbAccounts.getSelectionModel().getSelectedItem();
@@ -318,7 +346,6 @@ public class AccountController {
             MovementController controller = loader.getController();
             Stage modalStage = new Stage();
             
-            // Pasamos la cuenta. El controlador de movimientos la usará y MODIFICARÁ SU SALDO EN LA BD
             controller.initData(modalStage, seleccion);
 
             modalStage.setScene(new Scene(root));
@@ -326,11 +353,6 @@ public class AccountController {
             modalStage.initModality(Modality.APPLICATION_MODAL);
             
             modalStage.showAndWait();
-
-            // --- AL VOLVER ---
-            // Como MovementController ya se encargó de hacer el updateAccount_XML,
-            // los datos en la base de datos son correctos.
-            // Recargamos desde el servidor para ver el saldo actualizado en la tabla principal.
             
             cargarDatosDesdeServidor(); 
             
@@ -343,14 +365,23 @@ public class AccountController {
         }
     }
     
+    // --- CAMBIO CLAVE: Cargar solo datos del usuario ---
     private void cargarDatosDesdeServidor() {
+        if (this.user == null) return; // Seguridad
+
         try {
             GenericType<List<Account>> listType = new GenericType<List<Account>>() {};
-            List<Account> cuentas = restClient.findAll_XML(listType);
+            
+            // Usamos findAccountsByCustomerId en vez de findAll
+            List<Account> cuentas = restClient.findAccountsByCustomerId_XML(
+                    listType, 
+                    String.valueOf(this.user.getId())
+            );
+            
             accountsData.setAll(cuentas);
             calcularBalanceTotal();
         } catch (Exception e) {
-            LOGGER.severe("Error de conexión: " + e.getMessage());
+            LOGGER.severe("Error de conexión cargando datos: " + e.getMessage());
         }
     }
     
