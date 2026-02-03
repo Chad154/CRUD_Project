@@ -15,7 +15,7 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
 public class MenuController {
-    
+
     private static final Logger LOGGER = Logger.getLogger("MenuController");
 
     @FXML private MenuBar menuBar;
@@ -81,7 +81,9 @@ public class MenuController {
             stage.setTitle("Login");
             stage.setResizable(false);
             stage.show();
-            
+            SignInController controller = loader.getController();
+            controller.init(stage);
+
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error al cerrar sesión", e);
         }

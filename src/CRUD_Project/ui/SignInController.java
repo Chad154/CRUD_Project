@@ -46,10 +46,14 @@ public class SignInController {
 
     private static final Logger LOGGER = Logger.getLogger("proyectosignup.signup.ui");
 
-    public void init(Stage stage) {
-        LOGGER.info("Initializing window.");
+    // --- CAMBIO CLAVE: USAR initialize() ---
+    // Este método lo llama JavaFX automáticamente al cargar el FXML.
+    // Así los botones siempre funcionarán, vengas del Main o del LogOut.
+    @FXML
+    public void initialize() {
+        LOGGER.info("Initializing SignIn window (Automatic).");
 
-        // solo listeners y lógica
+        // Listeners y lógica
         bExit.setOnAction(this::handlebExitMethod);
         bLogIn.setOnAction(this::handlebLogInMethod);
         Hipervinculo.setOnAction(this::handleHiperVinculoMethod);
@@ -64,9 +68,15 @@ public class SignInController {
         bLogIn.setDefaultButton(true);
     }
 
+    // Mantenemos este método vacío para compatibilidad con tu Main (CRUD_Project.java)
+    // para que no te de error de compilación, pero ya no hace falta que haga nada.
+    public void init(Stage stage) {
+        // Ya se ha inicializado en el método initialize() de arriba.
+        // Puedes dejarlo vacío o usarlo si necesitas configurar algo específico del Stage (título, icono).
+    }
+
     public void init(Stage stage, Parent root) {
-        // no usar root, solo mantener compatibilidad
-        init(stage);
+        // Compatibilidad
     }
 
     //hipervinculo, inicia la ventana signup y cierra signin
@@ -123,16 +133,14 @@ public class SignInController {
                 return;
             }
 
-            // ===== LOGIN ADMIN (sin BD) =====
+            // ===== LOGIN ADMIN (TEMPORAL - va a Accounts para probar) =====
             if (user.equalsIgnoreCase("admin") && pass.equals("admin")) {
 
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("Customer.fxml"));
                 Parent root = loader.load();
 
                 Stage currentStage = (Stage) bLogIn.getScene().getWindow();
-                Scene newScene = new Scene(root);
-                currentStage.setScene(newScene);
-                currentStage.setTitle("Customers CRUD");
+                currentStage.setScene(new Scene(root));
                 currentStage.show();
 
                 CustomerController controller = loader.getController();

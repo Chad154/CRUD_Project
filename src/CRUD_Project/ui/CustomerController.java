@@ -4,6 +4,7 @@ import CRUD_Project.logic.CustomerRESTClient;
 import CRUD_Project.model.Customer;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -385,11 +386,11 @@ public class CustomerController {
         ok &= validarZip(tfZip);
         ok &= validarPhone(tfPhone);
 
-        // MiddleInitial opcional, pero si lo ponen: 1 letra
+        // MiddleInitial
         String mi = texto(tfMiddleInitial.getText());
-        if (!mi.isEmpty() && !mi.matches("^[A-Za-z]$")) {
+        if (!mi.isEmpty()) {
             marcarError(tfMiddleInitial, true);
-            mostrarInfo("Validación", "Middle Initial debe ser 1 letra (opcional).");
+            mostrarInfo("Validación", "Middle Initial debe ser 1 letra).");
             return false;
         } else {
             marcarError(tfMiddleInitial, false);

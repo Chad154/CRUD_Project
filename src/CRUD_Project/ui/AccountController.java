@@ -147,6 +147,7 @@ public class AccountController {
         btViewMovements.setOnAction(e -> manejarVerMovimientos());
     }
 
+    // Método para inicializar el Stage (si se llama manualmente desde Main)
     public void initStage(Parent root) {
         try {
             Scene scene = new Scene(root);
@@ -407,6 +408,7 @@ public class AccountController {
         }
     }
     
+    // --- CAMBIO CLAVE: Cargar solo datos del usuario ---
     private void cargarDatosDesdeServidor() {
         if (this.user == null) return; 
 
@@ -420,7 +422,7 @@ public class AccountController {
             accountsData.setAll(cuentas);
             calcularBalanceTotal();
         } catch (Exception e) {
-            LOGGER.severe("Error de conexión: " + e.getMessage());
+            LOGGER.severe("Error de conexión cargando datos: " + e.getMessage());
         }
     }
     
