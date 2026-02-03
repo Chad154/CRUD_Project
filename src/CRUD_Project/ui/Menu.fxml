@@ -13,7 +13,7 @@
         <menus>
           <Menu fx:id="menuActions" mnemonicParsing="false" text="Actions">
             <items>
-              <MenuItem fx:id="miViewMovements" mnemonicParsing="false" text="View Movements" />
+              <MenuItem fx:id="miViewMovements" mnemonicParsing="false" onAction="#handleViewMovementsMenu" text="View Movements" />
               
               <SeparatorMenuItem mnemonicParsing="false" />
               
@@ -28,4 +28,4 @@
         </menus>
       </MenuBar>
    </children>
-</HBox>  
+</HBox>

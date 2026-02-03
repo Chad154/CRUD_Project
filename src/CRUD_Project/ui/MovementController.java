@@ -73,12 +73,19 @@ public class MovementController {
         cbType.setItems(FXCollections.observableArrayList("DEPOSIT", "PAYMENT"));
         cbType.getSelectionModel().selectFirst();
 
+        // --- CAMBIO AQUÍ: ESTILO VISUAL IDÉNTICO AL LOGIN ---
+        bCreateMovement.setStyle("-fx-color: #16a9f0;"); // Color azul brillante
+        bCreateMovement.setDefaultButton(true);           // Se activa con ENTER
+        bGoBack.setCancelButton(true);                    // Se activa con ESC (Opcional, pero recomendado)
+        // ----------------------------------------------------
+
         bCreateMovement.setOnAction(this::handleCreateMovement);
         bUndoLastMovement.setOnAction(this::handleUndoLastMovement);
         bGoBack.setOnAction(e -> handleGoBack());
         
         bUndoLastMovement.setDisable(true); 
     }
+
 
     public void initData(Stage stage, Account account) {
         this.stage = stage;
@@ -88,6 +95,11 @@ public class MovementController {
         // Carga inicial segura
         actualizarSaldoDesdeServidor();
         loadMovements();
+
+        javafx.application.Platform.runLater(() -> {
+            tfAmount.requestFocus();
+            tfAmount.deselect();
+        });
     }
 
     // --- MÉTODO CLAVE: Evita datos obsoletos ---

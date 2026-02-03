@@ -5,10 +5,8 @@
  */
 package CRUD_Project.ui;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 import javafx.application.Platform;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -103,7 +101,7 @@ public class SignInController {
         Platform.exit();
     }
 
-    //cierra signin y abre la ventana changepassword
+    //cierra signin y abre la ventana account (FIXED)
     private void handlebLogInMethod(ActionEvent event) {
         try {
             String user = tfUsername.getText().trim();
@@ -128,7 +126,6 @@ public class SignInController {
             // ===== LOGIN ADMIN (sin BD) =====
             if (user.equalsIgnoreCase("admin") && pass.equals("admin")) {
 
-                // Cargar Customer.fxml y cambiar la escena en el mismo Stage
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("Customer.fxml"));
                 Parent root = loader.load();
 
@@ -138,11 +135,10 @@ public class SignInController {
                 currentStage.setTitle("Customers CRUD");
                 currentStage.show();
 
-                // Si tu CustomerController usa init(Stage) lo llamas aquí
                 CustomerController controller = loader.getController();
                 controller.init(currentStage);
 
-                return; // importante: no seguir con login normal
+                return; 
             }
 
             // ===== LOGIN NORMAL (con BD) =====
@@ -154,73 +150,59 @@ public class SignInController {
             );
             resCustomer.close();
 
-            // Tu flujo normal
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("CambioContraseña.fxml"));
+            // --- AQUÍ ESTÁ LA CORRECCIÓN ---
+            
+            // 1. Cargar el FXML de Account
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CRUD_Project/ui/account.fxml"));
             Parent root = loader.load();
 
-            ChangeController controller = loader.getController();
-            controller.setCustomer(customer);
+            // 2. Obtener el controlador
+            AccountController controller = loader.getController();
 
             Stage currentStage = (Stage) bLogIn.getScene().getWindow();
-            controller.init(currentStage, root);
+            
+            // 3. ¡PASO CLAVE! Pasar el usuario logueado al controlador
+            // Si no haces esto, 'this.user' será null en la otra ventana y dará error
+            controller.initData(currentStage, customer);
+
+            // 4. Mostrar la ventana
+            controller.initStage(root);
 
         } catch (InternalServerErrorException e) {
             LOGGER.warning(e.getLocalizedMessage());
-            new Alert(AlertType.INFORMATION,
-                    "ERROR: Problemas con el servidor, pruebe más tarde.")
-                    .showAndWait();
+            new Alert(AlertType.INFORMATION, "ERROR: Problemas con el servidor, pruebe más tarde.").showAndWait();
 
         } catch (NotAuthorizedException e) {
             LOGGER.warning(e.getLocalizedMessage());
-            new Alert(AlertType.INFORMATION,
-                    "ERROR: Usuario o Contraseña incorrectos")
-                    .showAndWait();
+            new Alert(AlertType.INFORMATION, "ERROR: Usuario o Contraseña incorrectos").showAndWait();
 
         } catch (Exception e) {
             LOGGER.warning(e.getLocalizedMessage());
-            new Alert(AlertType.INFORMATION,
-                    "ERROR inesperado, pruebe mas tarde")
-                    .showAndWait();
+            e.printStackTrace(); // Imprimir error real por consola para depurar
+            new Alert(AlertType.INFORMATION, "ERROR inesperado: " + e.getMessage()).showAndWait();
         }
     }
 
     //campos--------------------
-    /**
-     *
-     * @param observable
-     * @param oldValue
-     * @param newValue
-     */
     //username
     private void handletfUsernameTextChange(ObservableValue observable, String oldValue, String newValue) {
         try {
-
-            //Quitar borde rojo si el usuario escribe algo
             if (!newValue.trim().isEmpty()) {
                 tfUsername.setStyle(null);
             }
 
             if (newValue.length() > 200) {
-                Alert alert = new Alert(Alert.AlertType.ERROR,
-                        "Usuario demasiado largo",
-                        ButtonType.OK);
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Usuario demasiado largo", ButtonType.OK);
                 alert.showAndWait();
                 tfUsername.clear();
             }
         } catch (Exception e) {
             LOGGER.warning(e.getLocalizedMessage());
-            new Alert(AlertType.INFORMATION, "ERROR: Usuario demasiado largo").showAndWait();
         }
     }
 
-    /**
-     *
-     * @param observable
-     * @param oldValue
-     * @param newValue
-     */
     private void handletfUsernameFocusChange(ObservableValue observable, Boolean oldValue, Boolean newValue) {
-        if (newValue) {//si NewValue es true estas ganando el foco, y en else seria la perdida,y viceversa.  !oldValue, si lo niego, quiere decir q si era false,no estaba enfocado
+        if (newValue) {
             LOGGER.info("onFocus");
             tfUsername.requestFocus();
         } else if (oldValue) {
@@ -228,40 +210,23 @@ public class SignInController {
         }
     }
 
-    /**
-     *
-     * @param observable
-     * @param oldValue
-     * @param newValue
-     */
     //password
     private void handleftPasswordTextChange(ObservableValue observable, String oldValue, String newValue) {
         try {
-
-            //Quitar borde rojo si el usuario escribe algo
             if (!newValue.trim().isEmpty()) {
                 pfPassword.setStyle(null);
             }
 
             if (newValue.length() > 200) {
-                Alert alert = new Alert(Alert.AlertType.ERROR,
-                        "Contraseña demasiada larga",
-                        ButtonType.OK);
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Contraseña demasiada larga", ButtonType.OK);
                 alert.showAndWait();
                 pfPassword.clear();
             }
         } catch (Exception e) {
             LOGGER.warning(e.getLocalizedMessage());
-            new Alert(AlertType.INFORMATION, "ERROR: Contraseña demasiada larga").showAndWait();
         }
     }
 
-    /**
-     *
-     * @param observable
-     * @param oldValue
-     * @param newValue
-     */
     private void handletfPasswordFocusChange(ObservableValue observable, Boolean oldValue, Boolean newValue) {
         if (newValue) {
             LOGGER.info("onFocus");
@@ -270,5 +235,4 @@ public class SignInController {
             LOGGER.info("onBlur");
         }
     }
-
 }

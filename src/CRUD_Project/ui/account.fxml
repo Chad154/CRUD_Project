@@ -8,7 +8,10 @@
 <Pane prefHeight="850.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CRUD_Project.ui.AccountController">
    <children>
       <fx:include fx:id="hBoxMenu" source="Menu.fxml" layoutX="0.0" layoutY="0.0"/>
+      
       <Label layoutX="144.0" layoutY="40.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Customer ID :" />
+      
+      <TextField fx:id="tfCustomerId" editable="false" layoutX="309.0" layoutY="40.0" style="-fx-font-weight: bold;" />
 
       <TableView fx:id="tbAccounts" layoutX="50.0" layoutY="90.0" prefHeight="350.0" prefWidth="924.0">
          <columns>
@@ -51,7 +54,7 @@
             <Label text="Credit Line:" GridPane.columnIndex="2" />
             <TextField fx:id="tfCreditLine" promptText="0.00" GridPane.columnIndex="3" />
             
-           
+            
             <Label text="Opening Date:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <DatePicker fx:id="dpOpeningDate" prefWidth="250.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
 
@@ -77,7 +80,6 @@
             <TextField fx:id="tfTotalBalance" editable="false" prefWidth="150.0" style="-fx-alignment: center-right;" />
          </children>
       </HBox>
-      <TextField layoutX="309.0" layoutY="40.0" />
 
    </children>
 </Pane>
