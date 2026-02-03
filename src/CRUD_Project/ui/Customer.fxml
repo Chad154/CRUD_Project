@@ -4,13 +4,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="800.0" prefWidth="1300.0" 
-            xmlns="http://javafx.com/javafx/8" 
-            xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="CRUD_Project.ui.CustomerController">
+<AnchorPane prefHeight="800.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CRUD_Project.ui.CustomerController">
     <children>
-   
-        <Label layoutX="20" layoutY="15" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Customers CRUD" />
+        <fx:include source="Menu.fxml" />
+
+        <Label layoutX="387.0" layoutY="2.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Customers CRUD" />
    
         <!-- ================= FORMULARIO ================= -->
    

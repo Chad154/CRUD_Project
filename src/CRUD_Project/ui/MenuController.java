@@ -15,12 +15,15 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 
 public class MenuController {
-    
+
     private static final Logger LOGGER = Logger.getLogger("MenuController");
 
-    @FXML private MenuBar menuBar;
-    @FXML private MenuItem ViewChange; // Referencia al botón de movimientos
-    @FXML private MenuItem miLogOut;
+    @FXML
+    private MenuBar menuBar;
+    @FXML
+    private MenuItem ViewChange; // Referencia al botón de movimientos
+    @FXML
+    private MenuItem miLogOut;
 
     /**
      * IMPORTANTE: Este método permite que AccountController acceda al botón
@@ -48,7 +51,9 @@ public class MenuController {
             stage.setScene(new Scene(root));
             stage.setTitle("Login");
             stage.show();
-            
+            SignInController controller = loader.getController();
+            controller.init(stage);
+
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error al cerrar sesión", e);
         }
