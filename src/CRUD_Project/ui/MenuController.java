@@ -81,7 +81,6 @@ public class MenuController {
             stage.setTitle("Login");
             stage.setResizable(false);
             stage.show();
-            SignInController controller = loader.getController();
             controller.init(stage);
 
         } catch (IOException e) {
