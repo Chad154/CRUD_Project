@@ -4,7 +4,6 @@ import CRUD_Project.logic.CustomerRESTClient;
 import CRUD_Project.model.Customer;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,117 +15,73 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
 
-/**
- *
- * @author chad
- */
 public class CustomerController {
 
     private static final Logger LOGGER = Logger.getLogger(CustomerController.class.getName());
 
     // Campos (UI)
-    @FXML
-    private TextField tfId;
-    @FXML
-    private TextField tfFirstName;
-    @FXML
-    private TextField tfLastName;
-    @FXML
-    private TextField tfMiddleInitial;
-    @FXML
-    private TextField tfEmail;
-    @FXML
-    private PasswordField pfPassword;
+    @FXML private TextField tfId;
+    @FXML private TextField tfFirstName;
+    @FXML private TextField tfLastName;
+    @FXML private TextField tfMiddleInitial;
+    @FXML private TextField tfEmail;
+    @FXML private PasswordField pfPassword;
 
-    @FXML
-    private TextField tfStreet;
-    @FXML
-    private TextField tfCity;
-    @FXML
-    private TextField tfState;
-    @FXML
-    private TextField tfZip;
-    @FXML
-    private TextField tfPhone;
+    @FXML private TextField tfStreet;
+    @FXML private TextField tfCity;
+    @FXML private TextField tfState;
+    @FXML private TextField tfZip;
+    @FXML private TextField tfPhone;
 
     // Botones
-    @FXML
-    private Button btSearch;
-    @FXML
-    private Button btCreate;
-    @FXML
-    private Button btUpdate;
-    @FXML
-    private Button btDelete;
-    @FXML
-    private Button btRefresh;
-    @FXML
-    private Button btExit;
+    @FXML private Button btSearch;
+    @FXML private Button btCreate;
+    @FXML private Button btUpdate;
+    @FXML private Button btDelete;
+    @FXML private Button btRefresh;
+    @FXML private Button btExit;
 
-    @FXML
-    private TableView<Customer> tvCustomers;
-    @FXML
-    private TableColumn<Customer, String> colId;
-    @FXML
-    private TableColumn<Customer, String> colFirstName;
-    @FXML
-    private TableColumn<Customer, String> colLastName;
-    @FXML
-    private TableColumn<Customer, String> colEmail;
-    @FXML
-    private TableColumn<Customer, String> colCity;
-    @FXML
-    private TableColumn<Customer, String> colPhone;
-    @FXML
-    private TableColumn<Customer, String> colMiddleInitial;
-    @FXML
-    private TableColumn<Customer, String> colStreet;
-    @FXML
-    private TableColumn<Customer, String> colState;
-    @FXML
-    private TableColumn<Customer, String> colZip;
+    // Tabla
+    @FXML private TableView<Customer> tvCustomers;
+    @FXML private TableColumn<Customer, String> colId;
+    @FXML private TableColumn<Customer, String> colFirstName;
+    @FXML private TableColumn<Customer, String> colLastName;
+    @FXML private TableColumn<Customer, String> colEmail;
+    @FXML private TableColumn<Customer, String> colCity;
+    @FXML private TableColumn<Customer, String> colPhone;
+    @FXML private TableColumn<Customer, String> colMiddleInitial;
+    @FXML private TableColumn<Customer, String> colStreet;
+    @FXML private TableColumn<Customer, String> colState;
+    @FXML private TableColumn<Customer, String> colZip;
 
     private final ObservableList<Customer> lista = FXCollections.observableArrayList();
 
-    /**
-     *
-     * @param stage
-     */
     public void init(Stage stage) {
 
-        colId.setCellValueFactory(data
-                -> new SimpleStringProperty(data.getValue().getId() == null ? "" : String.valueOf(data.getValue().getId())));
-        colFirstName.setCellValueFactory(data
-                -> new SimpleStringProperty(texto(data.getValue().getFirstName())));
-        colLastName.setCellValueFactory(data
-                -> new SimpleStringProperty(texto(data.getValue().getLastName())));
-        colEmail.setCellValueFactory(data
-                -> new SimpleStringProperty(texto(data.getValue().getEmail())));
-        colCity.setCellValueFactory(data
-                -> new SimpleStringProperty(texto(data.getValue().getCity())));
-        colPhone.setCellValueFactory(data
-                -> new SimpleStringProperty(data.getValue().getPhone() == null ? "" : String.valueOf(data.getValue().getPhone())));
-        colMiddleInitial.setCellValueFactory(d
-                -> new SimpleStringProperty(texto(d.getValue().getMiddleInitial())));
-
-        colStreet.setCellValueFactory(d
-                -> new SimpleStringProperty(texto(d.getValue().getStreet())));
-
-        colState.setCellValueFactory(d
-                -> new SimpleStringProperty(texto(d.getValue().getState())));
-
-        colZip.setCellValueFactory(d
-                -> new SimpleStringProperty(
-                        d.getValue().getZip() == null ? "" : d.getValue().getZip().toString()
-                ));
-
-        colPhone.setCellValueFactory(d
-                -> new SimpleStringProperty(
-                        d.getValue().getPhone() == null ? "" : d.getValue().getPhone().toString()
-                ));
+        colId.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().getId() == null ? "" : String.valueOf(data.getValue().getId())));
+        colFirstName.setCellValueFactory(data ->
+                new SimpleStringProperty(texto(data.getValue().getFirstName())));
+        colLastName.setCellValueFactory(data ->
+                new SimpleStringProperty(texto(data.getValue().getLastName())));
+        colEmail.setCellValueFactory(data ->
+                new SimpleStringProperty(texto(data.getValue().getEmail())));
+        colCity.setCellValueFactory(data ->
+                new SimpleStringProperty(texto(data.getValue().getCity())));
+        colMiddleInitial.setCellValueFactory(d ->
+                new SimpleStringProperty(texto(d.getValue().getMiddleInitial())));
+        colStreet.setCellValueFactory(d ->
+                new SimpleStringProperty(texto(d.getValue().getStreet())));
+        colState.setCellValueFactory(d ->
+                new SimpleStringProperty(texto(d.getValue().getState())));
+        colZip.setCellValueFactory(d ->
+                new SimpleStringProperty(d.getValue().getZip() == null ? "" : d.getValue().getZip().toString()));
+        colPhone.setCellValueFactory(d ->
+                new SimpleStringProperty(d.getValue().getPhone() == null ? "" : d.getValue().getPhone().toString()));
 
         tvCustomers.setItems(lista);
 
@@ -150,9 +105,8 @@ public class CustomerController {
         tfId.requestFocus();
     }
 
-    /**
-     * Metodo para cargar la base de datos llamando al RestClient
-     */
+    // ========================= LISTA =========================
+
     private void cargarLista() {
         CustomerRESTClient client = new CustomerRESTClient();
         try {
@@ -168,9 +122,8 @@ public class CustomerController {
         }
     }
 
-    /**
-     *
-     */
+    // ========================= SEARCH =========================
+
     private void buscarPorId() {
         String idTxt = texto(tfId.getText());
         if (!esNumero(idTxt)) {
@@ -197,13 +150,18 @@ public class CustomerController {
         }
     }
 
-    /**
-     *
-     */
+    // ========================= CREATE =========================
+
     private void crear() {
-        if (!validarFormulario(false)) {
+        if (!validarFormulario(false)) return;
+
+        // ✅ BLOQUEO EMAIL DUPLICADO (cliente-side)
+        if (emailYaExiste(texto(tfEmail.getText()), null)) {
+            marcarError(tfEmail, true);
+            mostrarError("Error", "Error: el email ya existe");
             return;
         }
+        marcarError(tfEmail, false);
 
         Customer c = construirCustomerDesdeFormulario(null);
 
@@ -213,16 +171,24 @@ public class CustomerController {
             mostrarInfo("OK", "Customer creado.");
             limpiarFormulario();
             cargarLista();
+
+        } catch (ForbiddenException ex) {
+            // Si tu server devuelve 403
+            mostrarError("Error", "Error: el email ya existe");
+
+        } catch (InternalServerErrorException ex) {
+            mostrarError("Servidor", "Error con el servidor al crear.");
+
         } catch (Exception ex) {
             manejarError("crear", ex);
+
         } finally {
             client.close();
         }
     }
 
-    /**
-     *
-     */
+    // ========================= UPDATE =========================
+
     private void actualizar() {
         String idTxt = texto(tfId.getText());
         if (!esNumero(idTxt)) {
@@ -232,11 +198,18 @@ public class CustomerController {
         }
         marcarError(tfId, false);
 
-        if (!validarFormulario(true)) {
-            return;
-        }
+        if (!validarFormulario(true)) return;
 
         Long id = Long.parseLong(idTxt);
+
+        // ✅ BLOQUEO EMAIL DUPLICADO EN UPDATE (ignorando mi propio ID)
+        if (emailYaExiste(texto(tfEmail.getText()), id)) {
+            marcarError(tfEmail, true);
+            mostrarError("Error", "Error: el email ya existe");
+            return;
+        }
+        marcarError(tfEmail, false);
+
         Customer c = construirCustomerDesdeFormulario(id);
 
         CustomerRESTClient client = new CustomerRESTClient();
@@ -244,18 +217,20 @@ public class CustomerController {
             client.edit_XML(c);
             mostrarInfo("OK", "Customer actualizado.");
             cargarLista();
+
+        } catch (ForbiddenException ex) {
+            mostrarError("Error", "Error: el email ya existe");
+
         } catch (Exception ex) {
             manejarError("actualizar", ex);
+
         } finally {
             client.close();
         }
     }
 
-    /**
-     * Metodo para borrar un Customer de la BD, valida el ID y pregunta si
-     * quieres borrar el usuario, posteriormente se utiliza el metodo remove del
-     * RestClient
-     */
+    // ========================= DELETE =========================
+
     private void borrar() {
         String idTxt = texto(tfId.getText());
         if (!esNumero(idTxt)) {
@@ -270,9 +245,7 @@ public class CustomerController {
                 ButtonType.OK, ButtonType.CANCEL);
         confirm.setHeaderText("Confirmar borrado");
 
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
-            return;
-        }
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
 
         CustomerRESTClient client = new CustomerRESTClient();
         try {
@@ -287,17 +260,62 @@ public class CustomerController {
         }
     }
 
+    // ========================= EMAIL DUPLICADO =========================
+
     /**
-     *
-     * @param id
-     * @return Metodo que recoge todos los datos del formulario y los devuelve
-     * como c
+     * Devuelve true si ya existe un customer con ese email.
+     * Si ignoreId != null, ignora ese customer (para update).
      */
+    private boolean emailYaExiste(String email, Long ignoreId) {
+        if (email == null || email.trim().isEmpty()) return false;
+
+        String target = email.trim().toLowerCase();
+
+        // Si ya tienes lista cargada, úsala (rápido)
+        if (!lista.isEmpty()) {
+            for (Customer c : lista) {
+                if (c == null) continue;
+                if (ignoreId != null && c.getId() != null && c.getId().equals(ignoreId)) continue;
+
+                String e = texto(c.getEmail()).toLowerCase();
+                if (!e.isEmpty() && e.equals(target)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Si lista está vacía por lo que sea, consulta al servidor
+        CustomerRESTClient client = new CustomerRESTClient();
+        try {
+            Customer[] customers = client.findAll_XML(Customer[].class);
+            if (customers == null) return false;
+
+            for (Customer c : customers) {
+                if (c == null) continue;
+                if (ignoreId != null && c.getId() != null && c.getId().equals(ignoreId)) continue;
+
+                String e = texto(c.getEmail()).toLowerCase();
+                if (!e.isEmpty() && e.equals(target)) {
+                    return true;
+                }
+            }
+            return false;
+
+        } catch (Exception ex) {
+            // Si falla la comprobación, no bloquees por falso positivo
+            LOGGER.warning("No se pudo comprobar email duplicado: " + ex.getMessage());
+            return false;
+        } finally {
+            client.close();
+        }
+    }
+
+    // ========================= MAPEOS FORM <-> MODEL =========================
+
     private Customer construirCustomerDesdeFormulario(Long id) {
         Customer c = new Customer();
-        if (id != null) {
-            c.setId(id);
-        }
+        if (id != null) c.setId(id);
 
         c.setFirstName(texto(tfFirstName.getText()));
         c.setLastName(texto(tfLastName.getText()));
@@ -315,11 +333,6 @@ public class CustomerController {
         return c;
     }
 
-    /**
-     *
-     * @param c Coge c del metodo ConstruirDesdeFormulario y pone valores a cada
-     * parametro
-     */
     private void ponerEnFormulario(Customer c) {
         tfId.setText(c.getId() == null ? "" : String.valueOf(c.getId()));
         tfFirstName.setText(texto(c.getFirstName()));
@@ -335,9 +348,6 @@ public class CustomerController {
         tfPhone.setText(c.getPhone() == null ? "" : String.valueOf(c.getPhone()));
     }
 
-    /**
-     * Limpia todos los campos del formulario
-     */
     private void limpiarFormulario() {
         tfId.clear();
         tfFirstName.clear();
@@ -364,47 +374,39 @@ public class CustomerController {
         marcarError(tfState, false);
         marcarError(tfZip, false);
         marcarError(tfPhone, false);
+        pfPassword.setStyle(null);
     }
 
-    /**
-     *
-     * @param esUpdate
-     * @return Metodos de validacion de cada parametro, para la
-     * creacion/actualizacion de los datos dentro de la BD
-     */
+    // ========================= VALIDACIONES (IGUAL QUE SignUPController) =========================
+
     private boolean validarFormulario(boolean esUpdate) {
-        boolean ok = true;
 
-        ok &= validarObligatorio(tfFirstName, "First Name obligatorio.");
-        ok &= validarObligatorio(tfLastName, "Last Name obligatorio.");
-        ok &= validarEmail(tfEmail);
-        ok &= validarPassword(pfPassword);
+        if (!validarObligatorio(tfFirstName, "El nombre es obligatorio.")) return false;
+        if (!validarObligatorio(tfLastName, "El apellido es obligatorio.")) return false;
+        if (!validarObligatorio(tfMiddleInitial, "MiddleInitial es obligatorio.")) return false;
+        if (!validarObligatorio(tfStreet, "La calle es obligatoria.")) return false;
+        if (!validarObligatorio(tfCity, "La ciudad es obligatoria.")) return false;
+        if (!validarObligatorio(tfState, "El estado es obligatorio.")) return false;
+        if (!validarObligatorio(tfZip, "El ZIP es obligatorio.")) return false;
+        if (!validarObligatorio(tfPhone, "El teléfono es obligatorio.")) return false;
+        if (!validarObligatorio(tfEmail, "El email es obligatorio.")) return false;
 
-        ok &= validarObligatorio(tfStreet, "Street obligatoria.");
-        ok &= validarObligatorio(tfCity, "City obligatoria.");
-        ok &= validarState(tfState);
-        ok &= validarZip(tfZip);
-        ok &= validarPhone(tfPhone);
+        if (!validarMaxLen(tfFirstName, 255, "El nombre no puede contener más de 255 caracteres")) return false;
+        if (!validarMaxLen(tfLastName, 255, "El apellido no puede contener más de 255 caracteres")) return false;
+        if (!validarMaxLen(tfMiddleInitial, 255, "El apartado MiddleInitial no puede contener más de 255 caracteres")) return false;
+        if (!validarMaxLen(tfStreet, 255, "La calle no puede contener más de 255 caracteres")) return false;
+        if (!validarMaxLen(tfCity, 255, "La ciudad no puede contener más de 255 caracteres")) return false;
+        if (!validarMaxLen(tfState, 255, "El estado no puede contener más de 255 caracteres")) return false;
+        if (!validarMaxLen(tfEmail, 255, "El email no puede contener más de 255 caracteres")) return false;
 
-        // MiddleInitial
-        String mi = texto(tfMiddleInitial.getText());
-        if (!mi.isEmpty()) {
-            marcarError(tfMiddleInitial, true);
-            mostrarInfo("Validación", "Middle Initial debe ser 1 letra).");
-            return false;
-        } else {
-            marcarError(tfMiddleInitial, false);
-        }
+        if (!validarZip(tfZip)) return false;
+        if (!validarPhone(tfPhone)) return false;
+        if (!validarEmail(tfEmail)) return false;
+        if (!validarPassword(pfPassword)) return false;
 
-        return ok;
+        return true;
     }
 
-    /**
-     *
-     * @param tf
-     * @param mensaje
-     * @return
-     */
     private boolean validarObligatorio(TextField tf, String mensaje) {
         if (texto(tf.getText()).isEmpty()) {
             marcarError(tf, true);
@@ -415,91 +417,89 @@ public class CustomerController {
         return true;
     }
 
-    /**
-     *
-     * @param tf
-     * @return
-     */
-    private boolean validarEmail(TextField tf) {
-        String email = texto(tf.getText());
-        if (email.isEmpty() || !email.matches("^.+@.+\\..+$")) {
+    private boolean validarMaxLen(TextField tf, int max, String mensaje) {
+        String v = texto(tf.getText());
+        if (v.length() > max) {
             marcarError(tf, true);
-            mostrarInfo("Validación", "Email no válido (ej: a@b.com).");
+            mostrarInfo("Validación", mensaje);
             return false;
         }
         marcarError(tf, false);
         return true;
     }
 
-    /**
-     *
-     * @param pf
-     * @return
-     */
-    private boolean validarPassword(PasswordField pf) {
-        String pw = texto(pf.getText());
-        if (pw.isEmpty() || pw.length() < 4) {
-            pf.setStyle("-fx-border-color: red;");
-            mostrarInfo("Validación", "Password obligatorio (mínimo 4 caracteres).");
+    private boolean validarEmail(TextField tf) {
+        String email = texto(tf.getText());
+        if (!email.matches("^.+@.+\\..+$")) {
+            marcarError(tf, true);
+            mostrarInfo("Validación", "Tu email no es valida debe tener este formato ejemplo@ejemplo.ejemplo.");
             return false;
         }
+        marcarError(tf, false);
+        return true;
+    }
+
+    private boolean validarPassword(PasswordField pf) {
+        String pw = texto(pf.getText());
+
+        if (pw.isEmpty()) {
+            pf.setStyle("-fx-border-color: red;");
+            mostrarInfo("Validación", "La contraseña es obligatoria.");
+            return false;
+        }
+        if (pw.length() > 255) {
+            pf.setStyle("-fx-border-color: red;");
+            mostrarInfo("Validación", "La contraseña no puede contener más de 255 caracteres");
+            return false;
+        }
+        if (pw.length() < 8) {
+            pf.setStyle("-fx-border-color: red;");
+            mostrarInfo("Validación", "La contraseña debe tener al menos 8 caracteres.");
+            return false;
+        }
+
         pf.setStyle(null);
         return true;
     }
 
-    /**
-     *
-     * @param tf
-     * @return
-     */
-    private boolean validarState(TextField tf) {
-        String st = texto(tf.getText());
-        if (st.isEmpty() || st.length() < 2 || st.length() > 30) {
-            marcarError(tf, true);
-            mostrarInfo("Validación", "State obligatorio (2 a 30 caracteres).");
-            return false;
-        }
-        marcarError(tf, false);
-        return true;
-    }
-
-    /**
-     *
-     * @param tf
-     * @return
-     */
     private boolean validarZip(TextField tf) {
         String zip = texto(tf.getText());
-        if (!zip.matches("^\\d{4,10}$")) {
+
+        if (!zip.matches("\\d+")) {
             marcarError(tf, true);
-            mostrarInfo("Validación", "ZIP debe ser numérico (4 a 10 dígitos).");
+            mostrarInfo("Validación", "El campo zip tienen que ser numeros");
             return false;
         }
+        if (zip.length() > 10) {
+            marcarError(tf, true);
+            mostrarInfo("Validación", "El campo ZIP debe contener máximo 10 números.");
+            return false;
+        }
+
         marcarError(tf, false);
         return true;
     }
 
-    /**
-     *
-     * @param tf
-     * @return
-     */
     private boolean validarPhone(TextField tf) {
         String ph = texto(tf.getText());
-        if (!ph.matches("^\\d{6,15}$")) {
+
+        if (!ph.matches("\\d+")) {
             marcarError(tf, true);
-            mostrarInfo("Validación", "Phone debe ser numérico (6 a 15 dígitos).");
+            mostrarInfo("Validación", "El campo telefono deben ser numeros.");
             return false;
         }
+        if (!ph.matches("\\d{1,19}")) {
+            marcarError(tf, true);
+            mostrarInfo("Validación", "El campo Teléfono debe contener máximo 19 números.");
+            return false;
+        }
+
         marcarError(tf, false);
         return true;
     }
 
-    /**
-     *
-     * @param accion
-     * @param ex
-     */
+    // ========================= ERRORES REST =========================
+
     private void manejarError(String accion, Throwable ex) {
         LOGGER.warning("Error al " + accion + ": " + ex);
 
@@ -516,40 +516,29 @@ public class CustomerController {
         }
     }
 
-    /**
-     *
-     */
+    // ========================= NAVEGACIÓN =========================
+
     private void cerrar() {
-    try {
-        // 1. Cargamos el archivo físico
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/CRUD_Project/ui/SignIn.fxml"));
-        Parent root = loader.load();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CRUD_Project/ui/SignIn.fxml"));
+            Parent root = loader.load();
 
-        // 2. Obtenemos el controlador y lo despertamos
-        SignInController controller = loader.getController();
-        
-        // 3. Reutilizamos el Stage actual
-        Stage currentStage = (Stage) btExit.getScene().getWindow();
-        
-        // 4. Inicializamos la lógica del Login
-        controller.init(currentStage);
+            SignInController controller = loader.getController();
 
-        // 5. Cambiamos lo que ve el usuario
-        currentStage.setScene(new Scene(root));
-        currentStage.show();
+            Stage currentStage = (Stage) btExit.getScene().getWindow();
+            controller.init(currentStage);
 
-    } catch (IOException e) {
-        // Si el archivo no existe o la ruta está mal, entrará aquí
-        LOGGER.severe("Error al cargar la vista de Login: " + e.getMessage());
-        mostrarError("Error de Navegación", "No se pudo encontrar la ventana de inicio de sesión.");
+            currentStage.setScene(new Scene(root));
+            currentStage.show();
+
+        } catch (IOException e) {
+            LOGGER.severe("Error al cargar la vista de Login: " + e.getMessage());
+            mostrarError("Error de Navegación", "No se pudo encontrar la ventana de inicio de sesión.");
+        }
     }
-}
 
-    /**
-     *
-     * @param titulo
-     * @param msg
-     */
+    // ========================= UI HELPERS =========================
+
     private void mostrarInfo(String titulo, String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
         a.setTitle(titulo);
@@ -557,11 +546,6 @@ public class CustomerController {
         a.showAndWait();
     }
 
-    /**
-     *
-     * @param titulo
-     * @param msg
-     */
     private void mostrarError(String titulo, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
         a.setTitle(titulo);
@@ -569,29 +553,14 @@ public class CustomerController {
         a.showAndWait();
     }
 
-    /**
-     *
-     * @param tf
-     * @param error
-     */
     private void marcarError(TextField tf, boolean error) {
         tf.setStyle(error ? "-fx-border-color: red;" : null);
     }
 
-    /**
-     *
-     * @param s
-     * @return
-     */
     private boolean esNumero(String s) {
         return s != null && !s.trim().isEmpty() && s.trim().matches("\\d+");
     }
 
-    /**
-     *
-     * @param s
-     * @return
-     */
     private String texto(String s) {
         return (s == null) ? "" : s.trim();
     }
