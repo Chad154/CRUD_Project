@@ -120,68 +120,93 @@ public class MovementController {
     private void handleCreateMovement(ActionEvent event) {
         MovementRESTClient movementClient = null;
         AccountRESTClient accountClient = null;
-        
+
         try {
+            // validaciones
             if (tfAmount.getText().isEmpty()) return;
-            double amountInput = Double.parseDouble(tfAmount.getText());
-
+            double amountInput;
+            try {
+                amountInput = Double.parseDouble(tfAmount.getText());
+            } catch (NumberFormatException e) {
+                mostrarError("Introduce un número válido");
+                return;
+            }
             if (amountInput <= 0) {
-                mostrarError("The amount must be greater than zero.");
+                mostrarError("La cantidad debe ser positiva");
                 return;
             }
-
-            // Validar limite maximo
             if (amountInput > MAX_AMOUNT_LIMIT) {
-                mostrarError("The amount exceeds the permitted limit (€900,000,000).");
+                mostrarError("Límite superado");
                 return;
             }
 
-            // Obtener balance del servidor
-            actualizarSaldoDesdeServidor();
-            double saldoBase = (account.getBalance() != null) ? account.getBalance() : 0.0;
+            movementClient = new MovementRESTClient();
+            accountClient = new AccountRESTClient();
+
+            // Recuperar datos
+            Account cuentaFresca = accountClient.find_XML(Account.class, String.valueOf(this.account.getId()));
             
-            // Obteber linea de credito
-            double lineaCredito = (account.getCreditLine() != null) ? account.getCreditLine() : 0.0;
+            GenericType<List<Movement>> listType = new GenericType<List<Movement>>() {};
+            List<Movement> historial = movementClient.findMovementByAccount_XML(listType, String.valueOf(cuentaFresca.getId()));
 
+            double saldoBaseCalculo;
+
+            if (historial == null || historial.isEmpty()) {
+                // Aqui y SOLO aquí usamos el saldo inicial en caso de que sea el primer movimiento.
+                saldoBaseCalculo = (cuentaFresca.getBeginBalance() != null) ? cuentaFresca.getBeginBalance() : 0.0;
+            } else {
+                //Aqui cuando hay otros movimientos, tenemos que suar el ultimo de todos y ordenamos para usarlo
+                historial.sort((m1, m2) -> {
+                    if (m1.getTimestamp() == null) return -1;
+                    if (m2.getTimestamp() == null) return 1;
+                    return m1.getTimestamp().compareTo(m2.getTimestamp());
+                });
+
+                Movement ultimoMovimientoReal = historial.get(historial.size() - 1);
+                
+                // Usamos el saldo con el que quedó la cuenta tras ese movimiento
+                saldoBaseCalculo = (ultimoMovimientoReal.getBalance() != null) ? ultimoMovimientoReal.getBalance() : 0.0;
+            }
+
+            // Verificar fondos
+            double lineaCredito = (cuentaFresca.getCreditLine() != null) ? cuentaFresca.getCreditLine() : 0.0;
+            
             if ("PAYMENT".equals(cbType.getValue())) {
-                double fondosDisponibles = saldoBase + lineaCredito;
-
-                if (amountInput > fondosDisponibles) {
-                    mostrarError(String.format("Insufficient funds.\nCurrent balance: %.2f\nCredit limit: %.2f\nAvailable: %.2f", 
-                            saldoBase, lineaCredito, fondosDisponibles));
+                double totalDisponible = saldoBaseCalculo + lineaCredito;
+                
+                if (amountInput > totalDisponible) {
+                    mostrarError(String.format("Fondos insuficientes.\nSaldo Actual: %.2f\nCrédito: %.2f\nTotal Disp: %.2f", 
+                            saldoBaseCalculo, lineaCredito, totalDisponible));
                     return;
                 }
-                amountInput = -amountInput; 
+                amountInput = -amountInput; // Convertir a negativo
             }
 
-            // Calculo local
-            Double nuevoSaldo = saldoBase + amountInput;
+            // Calcular nuevo saldo
+            Double nuevoSaldoFinal = saldoBaseCalculo + amountInput;
 
-            // Crear movimiento
             Movement movement = new Movement();
             movement.setAmount(amountInput);
             movement.setDescription(cbType.getValue());
             movement.setTimestamp(new Date());
-            movement.setBalance(nuevoSaldo);
+            movement.setBalance(nuevoSaldoFinal); 
 
-            movementClient = new MovementRESTClient();
-            movementClient.create_XML(movement, String.valueOf(account.getId()));
+            // Crear el movimiento
+            movementClient.create_XML(movement, String.valueOf(cuentaFresca.getId()));
 
-            // Actualizar cuenta
-            this.account.setBalance(nuevoSaldo);
-            accountClient = new AccountRESTClient();
-            accountClient.updateAccount_XML(this.account);
+            // Actualizar la cuenta
+            cuentaFresca.setBalance(nuevoSaldoFinal);
+            accountClient.updateAccount_XML(cuentaFresca);
 
-            // Refrescar
+            // Refrescar vista
+            this.account.setBalance(nuevoSaldoFinal);
             tfAmount.clear();
-            loadMovements(); 
+            loadMovements();
             bUndoLastMovement.setDisable(false);
 
-        } catch (NumberFormatException e) {
-             mostrarError("Enter a valid number.");
         } catch (Exception e) {
             e.printStackTrace();
-            mostrarError("Error creating movement.");
+            mostrarError("Error: " + e.getMessage());
         } finally {
             if (movementClient != null) movementClient.close();
             if (accountClient != null) accountClient.close();

@@ -32,10 +32,10 @@ public class testMovements extends ApplicationTest {
     @Test
     public void test1_Navigate_Login_To_Movements() {
         clickOn("#tfUsername");
-        write("j@j.j");
+        write("jsmith@enterprise.net");
         
         clickOn("#pfPassword");
-        write("12345678");
+        write("abcd*1234");
         
         clickOn("#bLogIn");
 
