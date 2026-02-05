@@ -21,8 +21,7 @@ import javax.ws.rs.core.GenericType;
 public class MovementController {
 
     private static final Logger LOGGER = Logger.getLogger("MovementController");
-    
-    // --- NUEVO: Límite máximo para evitar errores de precisión en Double ---
+    //Deposito maximo para evitar errores con cifras muy grandes
     private static final double MAX_AMOUNT_LIMIT = 900_000_000.0; 
 
     @FXML private TableView<Movement> tvMovements;
@@ -44,7 +43,7 @@ public class MovementController {
 
     @FXML
     public void initialize() {
-        // --- COLUMNAS ---
+        // COLUMNAS
         colDate.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getTimestamp()));
         colDescription.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDescription()));
         colAmount.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getAmount()));
@@ -68,16 +67,14 @@ public class MovementController {
             }
         });
 
-        // UI
+        
         tfAccountId.setEditable(false);
         cbType.setItems(FXCollections.observableArrayList("DEPOSIT", "PAYMENT"));
         cbType.getSelectionModel().selectFirst();
-
-        // --- CAMBIO AQUÍ: ESTILO VISUAL IDÉNTICO AL LOGIN ---
-        bCreateMovement.setStyle("-fx-color: #16a9f0;"); // Color azul brillante
-        bCreateMovement.setDefaultButton(true);           // Se activa con ENTER
-        bGoBack.setCancelButton(true);                    // Se activa con ESC (Opcional, pero recomendado)
-        // ----------------------------------------------------
+        //Estilo y funciones de enter y esc
+        bCreateMovement.setStyle("-fx-color: #16a9f0;"); 
+        bCreateMovement.setDefaultButton(true);           
+        bGoBack.setCancelButton(true);                    
 
         bCreateMovement.setOnAction(this::handleCreateMovement);
         bUndoLastMovement.setOnAction(this::handleUndoLastMovement);
@@ -92,7 +89,7 @@ public class MovementController {
         this.account = account;
         tfAccountId.setText(String.valueOf(account.getId()));
         
-        // Carga inicial segura
+        // Carga inicial con datos actualizados
         actualizarSaldoDesdeServidor();
         loadMovements();
 
@@ -102,18 +99,18 @@ public class MovementController {
         });
     }
 
-    // --- MÉTODO CLAVE: Evita datos obsoletos ---
+    // Para evitar datos obsoletos, con un el objeto account que se pasa
     private void actualizarSaldoDesdeServidor() {
         AccountRESTClient client = null;
         try {
             client = new AccountRESTClient();
             Account cuentaFresca = client.find_XML(Account.class, String.valueOf(this.account.getId()));
             if (cuentaFresca != null) {
-                // IMPORTANTE: Solo actualizamos el saldo para no perder la info de crédito si el XML viene incompleto
+                //Obtenemos el balance
                 this.account.setBalance(cuentaFresca.getBalance());
             }
         } catch (Exception e) {
-            LOGGER.severe("Error sincronizando saldo: " + e.getMessage());
+            LOGGER.severe("Error synchronizing balance: " + e.getMessage());
         } finally {
             if (client != null) client.close();
         }
@@ -129,38 +126,38 @@ public class MovementController {
             double amountInput = Double.parseDouble(tfAmount.getText());
 
             if (amountInput <= 0) {
-                mostrarError("La cantidad debe ser mayor que cero.");
+                mostrarError("The amount must be greater than zero.");
                 return;
             }
 
-            // --- NUEVO: VALIDACIÓN DE LÍMITE ---
+            // Validar limite maximo
             if (amountInput > MAX_AMOUNT_LIMIT) {
-                mostrarError("La cantidad supera el límite permitido\n (900.000.000 €).");
+                mostrarError("The amount exceeds the permitted limit (€900,000,000).");
                 return;
             }
 
-            // 1. LEER DEL SERVIDOR
+            // Obtener balance del servidor
             actualizarSaldoDesdeServidor();
             double saldoBase = (account.getBalance() != null) ? account.getBalance() : 0.0;
             
-            // OBTENER LÍNEA DE CRÉDITO
+            // Obteber linea de credito
             double lineaCredito = (account.getCreditLine() != null) ? account.getCreditLine() : 0.0;
 
             if ("PAYMENT".equals(cbType.getValue())) {
                 double fondosDisponibles = saldoBase + lineaCredito;
 
                 if (amountInput > fondosDisponibles) {
-                    mostrarError(String.format("Fondos insuficientes.\nSaldo actual: %.2f\nLímite crédito: %.2f\nDisponible: %.2f", 
+                    mostrarError(String.format("Insufficient funds.\nCurrent balance: %.2f\nCredit limit: %.2f\nAvailable: %.2f", 
                             saldoBase, lineaCredito, fondosDisponibles));
                     return;
                 }
                 amountInput = -amountInput; 
             }
 
-            // 2. CALCULAR
+            // Calculo local
             Double nuevoSaldo = saldoBase + amountInput;
 
-            // 3. CREAR MOVIMIENTO
+            // Crear movimiento
             Movement movement = new Movement();
             movement.setAmount(amountInput);
             movement.setDescription(cbType.getValue());
@@ -170,21 +167,21 @@ public class MovementController {
             movementClient = new MovementRESTClient();
             movementClient.create_XML(movement, String.valueOf(account.getId()));
 
-            // 4. ACTUALIZAR CUENTA 
+            // Actualizar cuenta
             this.account.setBalance(nuevoSaldo);
             accountClient = new AccountRESTClient();
             accountClient.updateAccount_XML(this.account);
 
-            // 5. REFRESCAR
+            // Refrescar
             tfAmount.clear();
             loadMovements(); 
             bUndoLastMovement.setDisable(false);
 
         } catch (NumberFormatException e) {
-             mostrarError("Introduce un número válido");
+             mostrarError("Enter a valid number.");
         } catch (Exception e) {
             e.printStackTrace();
-            mostrarError("Error creando movimiento.");
+            mostrarError("Error creating movement.");
         } finally {
             if (movementClient != null) movementClient.close();
             if (accountClient != null) accountClient.close();
@@ -201,7 +198,7 @@ public class MovementController {
         if (lastMovement == null) return;
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
-                "¿Deshacer movimiento de " + lastMovement.getAmount() + "€?", ButtonType.YES, ButtonType.NO);
+                "¿Undo movement of " + lastMovement.getAmount() + "€?", ButtonType.YES, ButtonType.NO);
         confirm.showAndWait();
 
         if (confirm.getResult() == ButtonType.YES) {
@@ -209,28 +206,28 @@ public class MovementController {
             AccountRESTClient accountClient = null;
             
             try {
-                // 1. LEER SALDO REAL ACTUAL
+                // leer saldo actual 
                 actualizarSaldoDesdeServidor();
                 Double saldoActual = (this.account.getBalance() != null) ? this.account.getBalance() : 0.0;
                 
-                // 2. REVERTIR LA OPERACIÓN
+                // revertir la operacion
                 Double saldoRestaurado = saldoActual - lastMovement.getAmount();
 
-                // 3. ACTUALIZAR CUENTA PRIMERO
+                // actualizar cuenta
                 this.account.setBalance(saldoRestaurado);
                 accountClient = new AccountRESTClient();
                 accountClient.updateAccount_XML(this.account);
 
-                // 4. BORRAR EL MOVIMIENTO DESPUÉS
+                // eliminar movimiento
                 movementClient = new MovementRESTClient();
                 movementClient.remove(lastMovement.getId().toString());
 
-                // 5. BLOQUEAR Y REFRESCAR
+                // bloquear y refrescar
                 bUndoLastMovement.setDisable(true);
                 loadMovements();
                 
             } catch (Exception e) {
-                mostrarError("Error al deshacer movimiento.");
+                mostrarError("Error undoing movement.");
                 e.printStackTrace();
             } finally {
                 if (movementClient != null) movementClient.close();

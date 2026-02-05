@@ -114,14 +114,14 @@ public class AccountController {
             LOGGER.severe("Error loading account types: " + e.getMessage());
         }
 
-        // 4. Listener para lógica de negocio: Cuentas STANDARD no tienen línea de crédito
+        // Listener para controlar el Credit Line
         cbType.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 if (newVal.toString().equalsIgnoreCase("STANDARD")) {
                     tfCreditLine.setText("0.0");
-                    tfCreditLine.setDisable(true); // Bloquear campo
+                    tfCreditLine.setDisable(true); 
                 } else {
-                    tfCreditLine.setDisable(false); // Habilitar campo
+                    tfCreditLine.setDisable(false); 
                 }
             }
         });
