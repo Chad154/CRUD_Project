@@ -282,8 +282,8 @@ public class TestAccountController extends ApplicationTest {
      */
     private void login() {
         esperar(1);
-        clickOn("#tfUsername").write("danibusiness39@gmail.com");
-        clickOn("#pfPassword").write("123456789");
+        clickOn("#tfUsername").write("jsmith@enterprise.net");
+        clickOn("#pfPassword").write("abcd*1234");
         clickOn("#bLogIn");
         verifyThat("#tbAccounts", isVisible());
         esperar(2);
