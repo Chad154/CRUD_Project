@@ -30,6 +30,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Modality;
+import java.util.Comparator; 
 
 public class AccountController {
 
@@ -91,20 +92,17 @@ public class AccountController {
             LOGGER.severe("Error types: " + e.getMessage());
         }
 
-        // --- NUEVO: Listener para controlar el Credit Line ---
+        // Listener para controlar el Credit Line
         cbType.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                // Asumo que el enum se llama STANDARD (ajústalo si es Standard o similar)
                 if (newVal.toString().equalsIgnoreCase("STANDARD")) {
                     tfCreditLine.setText("0.0");
-                    tfCreditLine.setDisable(true); // Se bloquea
+                    tfCreditLine.setDisable(true); 
                 } else {
-                    // Si es CREDIT (o cualquier otro), se habilita
                     tfCreditLine.setDisable(false); 
                 }
             }
         });
-        // ----------------------------------------------------
 
         tcAccountNumber.setCellValueFactory(new PropertyValueFactory<>("id"));
         tcDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -112,6 +110,7 @@ public class AccountController {
         tcCreditLine.setCellValueFactory(new PropertyValueFactory<>("creditLine"));
         tcBeginBalance.setCellValueFactory(new PropertyValueFactory<>("beginBalance"));
         tcOpeningDate.setCellValueFactory(new PropertyValueFactory<>("beginBalanceTimestamp"));
+        
 
         tcBalance.setCellValueFactory(cellData -> 
              new SimpleObjectProperty<>(cellData.getValue().getBalance())
@@ -140,6 +139,9 @@ public class AccountController {
                 habilitarModoCreacion();
             }
         });
+        
+        btCreate.setStyle("-fx-color: #16a9f0;");
+        btDelete.setStyle("-fx-color: #d32f2f;");
 
         btCreate.setOnAction(this::manejarCrearCuenta);
         btUpdate.setOnAction(e -> manejarActualizarCuenta());
@@ -147,7 +149,6 @@ public class AccountController {
         btViewMovements.setOnAction(e -> manejarVerMovimientos());
     }
 
-    // Método para inicializar el Stage (si se llama manualmente desde Main)
     public void initStage(Parent root) {
         try {
             Scene scene = new Scene(root);
@@ -190,7 +191,7 @@ public class AccountController {
     private void cargarDatosEnFormulario(Account account) {
         tfAccountNumber.setText(String.valueOf(account.getId()));
         tfDescription.setText(account.getDescription());
-        cbType.getSelectionModel().select(account.getType()); // Esto disparará el listener automáticamente
+        cbType.getSelectionModel().select(account.getType()); 
         tfCreditLine.setText(String.valueOf(account.getCreditLine()));
         
         tfBeginBalance.setText(account.getBeginBalance() != null ? String.valueOf(account.getBeginBalance()) : "0.0");
@@ -211,7 +212,6 @@ public class AccountController {
 
         tfDescription.setDisable(false);
         
-        // CORRECCIÓN: Respetamos la lógica del tipo de cuenta
         AccountType tipo = cbType.getValue();
         if (tipo != null && tipo.toString().equalsIgnoreCase("STANDARD")) {
             tfCreditLine.setDisable(true);
@@ -234,7 +234,6 @@ public class AccountController {
 
         tfDescription.setDisable(false);
         
-        // CORRECCIÓN: Respetamos la lógica al limpiar
         AccountType tipo = cbType.getValue();
         if (tipo != null && tipo.toString().equalsIgnoreCase("STANDARD")) {
             tfCreditLine.setDisable(true);
@@ -302,6 +301,13 @@ public class AccountController {
             habilitarModoCreacion(); 
             cargarDatosDesdeServidor();
             
+            // Scroll al final para ver la nueva cuenta
+            if (!accountsData.isEmpty()) {
+                int ultimoIndex = accountsData.size() - 1;
+                tbAccounts.scrollTo(ultimoIndex);
+                tbAccounts.getSelectionModel().select(ultimoIndex);
+            }
+            
         } catch (javax.ws.rs.ClientErrorException e) {
             LOGGER.severe("Error REST: " + e.getMessage());
             mostrarError("Error al guardar. Inténtalo de nuevo.");
@@ -353,7 +359,12 @@ public class AccountController {
          } catch (Exception e) {
              LOGGER.severe("Error comprobando movimientos: " + e.getMessage());
          } finally {
-             if (movementClient != null) movementClient.close();
+             // --- CORRECCIÓN BUG NULLPOINTER ---
+             try {
+                 if (movementClient != null) movementClient.close();
+             } catch (Exception ex) {
+                 LOGGER.warning("Error cerrando cliente movimientos: " + ex.getMessage());
+             }
          }
 
          Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "¿Borrar la cuenta " + seleccionada.getId() + " permanentemente?", ButtonType.YES, ButtonType.NO);
@@ -408,7 +419,6 @@ public class AccountController {
         }
     }
     
-    // --- CAMBIO CLAVE: Cargar solo datos del usuario ---
     private void cargarDatosDesdeServidor() {
         if (this.user == null) return; 
 
@@ -418,6 +428,13 @@ public class AccountController {
                     listType, 
                     String.valueOf(this.user.getId())
             );
+            
+            // Ordenar por Fecha (Antiguas primero -> Nuevas al FINAL)
+            cuentas.sort((a1, a2) -> {
+                if (a1.getBeginBalanceTimestamp() == null) return -1;
+                if (a2.getBeginBalanceTimestamp() == null) return 1;
+                return a1.getBeginBalanceTimestamp().compareTo(a2.getBeginBalanceTimestamp());
+            });
             
             accountsData.setAll(cuentas);
             calcularBalanceTotal();
