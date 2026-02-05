@@ -21,7 +21,7 @@ import CRUD_Project.logic.CustomerRESTClient;
 import CRUD_Project.model.Customer;
 
 public class SignUPController {
-    
+
     //Declaracion de las variables 
     @FXML
     private TextField tfName;
@@ -49,9 +49,9 @@ public class SignUPController {
     private Button btSignUp;
     @FXML
     private Button btExit;
-
+    
     private static final Logger LOGGER = Logger.getLogger("proyectosignup.signin.ui");
-
+    
     private Stage stage;
 
     //Metodo Init para la ventana
@@ -65,6 +65,8 @@ public class SignUPController {
             // estado inicial
             btSignUp.setDisable(true);
             btExit.setDisable(false);
+            btExit.setCancelButton(true);
+            btSignUp.setDefaultButton(true);
 
             // foco inicial
             tfName.requestFocus();
@@ -85,14 +87,13 @@ public class SignUPController {
             tfEmail.textProperty().addListener(this::validateForm);
             pwPassword.textProperty().addListener(this::validateForm);
             pfPasswordValidation.textProperty().addListener(this::validateForm);
-
+            
         } catch (Exception e) {
             LOGGER.severe("Error inicializando la ventana: " + e.getMessage());
         }
     }
 
     // Aqui esta todo el codigo sobre el funcionamiento de los botones
-    
     //Metodo para el funcionamiento al pulsar el boton de exit
     @FXML
     private void handlebExitMethod(ActionEvent event) {
@@ -108,7 +109,7 @@ public class SignUPController {
 
             // 3. Crear la nueva ventana
             Stage stageSignIn = new Stage();
-            
+
             // 4. Obtener el controlador y llamar a init con UN SOLO parámetro
             SignInController controller = loader.getController();
             controller.init(stageSignIn); // Cambiado: Solo pasamos el stage
@@ -119,7 +120,7 @@ public class SignUPController {
             stageSignIn.setTitle("Sign In");
             stageSignIn.setResizable(false);
             stageSignIn.show();
-
+            
         } catch (IOException e) {
             LOGGER.severe("Error al abrir la ventana de Sign In: " + e.getMessage());
             e.printStackTrace(); // Útil para ver el error exacto en la consola
@@ -205,11 +206,11 @@ public class SignUPController {
             customer.setPhone(Long.parseLong(tfPhone.getText().trim()));
             customer.setEmail(tfEmail.getText().trim());
             customer.setPassword(pwPassword.getText().trim());
-
+            
             client = new CustomerRESTClient();
             client.create_XML(customer);
             client.close();
-
+            
             new Alert(AlertType.INFORMATION, "Usuario creado correctamente").showAndWait();
             clearForm();
 
@@ -258,7 +259,7 @@ public class SignUPController {
                 && !tfEmail.getText().trim().isEmpty()
                 && !pwPassword.getText().trim().isEmpty()
                 && !pfPasswordValidation.getText().trim().isEmpty();
-
+        
         btSignUp.setDisable(!allFilled);
     }
 }
