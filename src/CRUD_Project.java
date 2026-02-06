@@ -27,5 +27,8 @@ public class CRUD_Project extends Application {
 
         stage.show();
     }
-    
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
