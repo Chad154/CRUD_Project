@@ -28,6 +28,8 @@ import static org.testfx.matcher.control.TextInputControlMatchers.hasText;
  * 4. Integridad Referencial (No borrar si hay movimientos).
  * </p>
  * @author Daniel López López
+ * @fixme Los métodos de test presentados son insuficientes.
+ * @fixme Crear sendos métodos de test para Read,Create,Update y Delete sobre la tabla de Cuentas que verifiquen sobre los items de la tabla cada caso de uso.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TestAccountController extends ApplicationTest {
@@ -97,6 +99,7 @@ public class TestAccountController extends ApplicationTest {
      */
     @Test
     public void test02_CrearYBorrarStandard() {
+        //FIXME borrar esta sentencia
         System.out.println("TEST 2: Cuenta STANDARD");
         login();
 

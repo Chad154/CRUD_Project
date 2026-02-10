@@ -6,7 +6,10 @@ import org.testfx.framework.junit.ApplicationTest;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 import static org.testfx.matcher.control.TextInputControlMatchers.hasText;
-
+/**
+ * @fixme Los métodos de test presentados son insuficientes.
+ * @fixme Crear sendos métodos de test para Read,Create,Update y Delete sobre la tabla de Customers que verifiquen sobre los items de la tabla cada caso de uso.
+ */
 public class TestCustomerController extends ApplicationTest {
 
     /**

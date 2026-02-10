@@ -20,6 +20,8 @@ import static org.testfx.matcher.base.NodeMatchers.isEnabled;
 /**
  *
  * @author imad
+ * @fixme Los métodos de test presentados son insuficientes.
+ * @fixme Crear sendos métodos de test para Read,Create y Delete (último movimiento) sobre la tabla de Movements que verifiquen sobre los items de la tabla cada caso de uso.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class testMovements extends ApplicationTest {
