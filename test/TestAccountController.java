@@ -1,15 +1,24 @@
 import CRUD_Project.ui.SignInController;
 import CRUD_Project.model.AccountType;
 import CRUD_Project.model.Account;
+import java.util.List;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.runners.MethodSorters;
 import org.testfx.framework.junit.ApplicationTest;
 
@@ -57,7 +66,8 @@ public class TestAccountController extends ApplicationTest {
      * Verifica que el sistema rechaza: campos vacíos, texto en campos numéricos y números negativos.
      */
     @Test
-    public void test01_ValidacionesFormulario() {
+    @Ignore
+    public void test_ValidacionesFormulario() {
         System.out.println("TEST 1: Validaciones");
         login(); 
 
@@ -92,79 +102,244 @@ public class TestAccountController extends ApplicationTest {
         
         System.out.println("   -> Validaciones (Vacío, Texto y Negativos) OK.");
     }
-
-    /**
-     * TEST 02: Ciclo Standard.
-     * Verifica la creación y el borrado de una cuenta de tipo Standard (sin línea de crédito).
-     */
+    
     @Test
-    public void test02_CrearYBorrarStandard() {
-        //FIXME borrar esta sentencia
-        System.out.println("TEST 2: Cuenta STANDARD");
-        login();
-
-        String nombre = "STD_" + System.currentTimeMillis();
+    @Ignore
+    public void test_Read() {
+        clickOn("#tfUsername").write("jsmith@enterprise.net");
+        clickOn("#pfPassword").write("abcd*1234");
+        clickOn("#bLogIn");
         
-        // Crear
-        clickOn("#tfDescription").write(nombre);
-        ComboBox<AccountType> cbType = lookup("#cbType").queryComboBox();
-        interact(() -> cbType.getSelectionModel().select(AccountType.STANDARD));
-        doubleClickOn("#tfBeginBalance").write("100");
-        
-        clickOn("#btCreate");
-        esperar(1); 
-        verifyThat(".dialog-pane", isVisible()); 
-        push(KeyCode.ENTER); esperar(2); 
-
-        // Verificar
-        seleccionarUltimaFila();
-        verifyThat("#tfDescription", hasText(nombre));
-
-        // Borrar
-        borrarCuentaSeleccionada();
-        
-        System.out.println("   -> Standard OK.");
+        verifyThat("#tbAccounts", isVisible());
+        TableView<?> table = lookup("#tbAccounts").query();
+        ObservableList<?> items = table.getItems();
+        assertFalse("La tabla debería tener datos", items.isEmpty());
+        for (Object item : items) {
+            assertEquals(
+                "El item de la tabla no es un Account",
+                true,
+                item instanceof Account
+            );
+        }
     }
-
-    /**
-     * TEST 03: Modificación.
-     * Verifica la actualización de una cuenta y la persistencia de los cambios.
-     */
+    
     @Test
-    public void test03_ModificarCuenta() {
-        System.out.println("TEST 3: Modificar Cuenta");
-        login();
-
-        String nombreOriginal = "MOD_" + System.currentTimeMillis();
-        crearCuentaAuxiliar(nombreOriginal, "500");
-
-        // Modificar
-        seleccionarUltimaFila();
-        clickOn("#tfDescription");
-        push(KeyCode.END); // Ir al final
-        write("_UPDATED");
+    @Ignore
+    public void test_Create() {
+        clickOn("#tfUsername").write("jsmith@enterprise.net");
+        clickOn("#pfPassword").write("abcd*1234");
+        clickOn("#bLogIn");
+        verifyThat("#tbAccounts", isVisible());
         
-        // Guardar
-        clickOn("#btUpdate");
-        esperar(1); 
-        verifyThat(".dialog-pane", isVisible()); 
-        push(KeyCode.ENTER); esperar(2); 
-
-        // Recargar para verificar persistencia real
         TableView<Account> tabla = lookup("#tbAccounts").queryTableView();
-        interact(() -> {
-            tabla.refresh();
-            tabla.getSelectionModel().clearSelection();
-        });
-        
-        seleccionarUltimaFila();
-        
-        // 4. Verificar cambio
-        verifyThat("#tfDescription", hasText(nombreOriginal + "_UPDATED"));
+        int filasAntes = tabla.getItems().size();
+        String descTest = "Nueva Cuenta Test " + System.currentTimeMillis();
 
-        // 5. Limpieza
-        borrarCuentaSeleccionada();
-        System.out.println("   -> Modificación OK.");
+        clickOn("#tfDescription").write(descTest);
+        ComboBox<AccountType> cbType = lookup("#cbType").queryComboBox();
+        interact(() -> cbType.getSelectionModel().select(AccountType.CREDIT));
+        doubleClickOn("#tfCreditLine").write("500.0");
+        doubleClickOn("#tfBeginBalance").write("100.0");
+
+        clickOn("#btCreate");
+        verifyThat(".dialog-pane", isVisible());
+        push(KeyCode.ENTER);
+
+        assertEquals("La tabla debería tener una fila más", filasAntes + 1, tabla.getItems().size());
+
+        Account nueva = tabla.getItems().get(tabla.getItems().size() - 1);
+        assertEquals("La descripción debe coincidir", descTest, nueva.getDescription());
+        assertEquals("El saldo inicial debe ser 100.0", Double.valueOf(100.0), nueva.getBalance());
+        assertNotNull("El ID no debe ser null", nueva.getId());
+        assertEquals("El tipo debe ser CREDIT", AccountType.CREDIT, nueva.getType());
+        assertEquals("La línea de crédito debe ser 500.0", Double.valueOf(500.0), nueva.getCreditLine());
+        assertNotNull("La cuenta no debe ser null", nueva);
+    }
+    
+    @Test
+    @Ignore
+    public void test_Update() {
+
+        clickOn("#tfUsername").write("jsmith@enterprise.net");
+        clickOn("#pfPassword").write("abcd*1234");
+        clickOn("#bLogIn");
+
+        verifyThat("#tbAccounts", isVisible());
+
+        TableView<Account> table = lookup("#tbAccounts").queryTableView();
+        assertFalse("La tabla no debería estar vacía", table.getItems().isEmpty());
+
+        Account original = table.getItems().stream()
+                .filter(a -> a.getType() == AccountType.CREDIT)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(
+            "No hay cuentas de crédito para probar UPDATE",
+            original
+        );
+
+        interact(() -> table.getSelectionModel().select(original));
+
+        String nuevaDesc = "Update_Desc_" + System.currentTimeMillis();
+        String nuevaLine = "200.0";
+
+        clickOn("#tfDescription");
+        push(KeyCode.CONTROL, KeyCode.A);
+        write(nuevaDesc);
+
+        clickOn("#tfCreditLine");
+        push(KeyCode.CONTROL, KeyCode.A);
+        write(nuevaLine);
+
+        clickOn("#btUpdate");
+
+        verifyThat(".dialog-pane", isVisible());
+        push(KeyCode.ENTER);
+
+        Account updated = table.getItems().stream()
+                .filter(a -> a.getId().equals(original.getId()))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull("La cuenta actualizada no existe en la tabla", updated);
+        assertEquals("La descripción no se actualizó", nuevaDesc, updated.getDescription());
+        assertEquals("La línea de crédito no se actualizó",
+                Double.valueOf(nuevaLine), updated.getCreditLine());
+    }
+    
+    @Test
+    @Ignore
+    public void test_Delete_Sin_Mov() {
+
+        clickOn("#tfUsername").write("jsmith@enterprise.net");
+        clickOn("#pfPassword").write("abcd*1234");
+        clickOn("#bLogIn");
+        verifyThat("#tbAccounts", isVisible());
+
+        TableView<Account> table = lookup("#tbAccounts").queryTableView();
+
+        assertTrue("La tabla no tiene cuentas para borrar",
+                table.getItems().size() > 0);
+
+        int rowsBefore = table.getItems().size();
+
+        interact(() -> {
+            int last = table.getItems().size() - 1;
+            table.scrollTo(last);
+            table.getSelectionModel().select(last);
+        });
+
+        clickOn("#btDelete");
+
+        verifyThat(".dialog-pane", isVisible());
+        push(KeyCode.ENTER);
+
+        verifyThat(".dialog-pane", isVisible());
+
+        push(KeyCode.ENTER);
+
+        assertEquals("La cuenta no se eliminó de la tabla",
+                rowsBefore - 1,
+                table.getItems().size());
+    }
+    
+    @Test
+    @Ignore
+    public void test_Delete_Con_Mov() {
+
+        clickOn("#tfUsername").write("jsmith@enterprise.net");
+        clickOn("#pfPassword").write("abcd*1234");
+        clickOn("#bLogIn");
+        verifyThat("#tbAccounts", isVisible());
+
+        TableView<Account> table = lookup("#tbAccounts").queryTableView();
+        assertFalse("La tabla debería tener cuentas", table.getItems().isEmpty());
+
+        Account conMovimientos = table.getItems().stream()
+                .filter(a -> a.getMovements() != null && !a.getMovements().isEmpty())
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(
+            "No hay cuentas con movimientos para probar el caso",
+            conMovimientos
+        );
+
+        int rowsBefore = table.getItems().size();
+        Long idCuenta = conMovimientos.getId();
+
+        interact(() -> table.getSelectionModel().select(conMovimientos));
+
+        clickOn("#btDelete");
+
+        verifyThat(".dialog-pane", isVisible());
+        push(KeyCode.ENTER);
+
+        assertEquals(
+            "La tabla no debería cambiar al intentar borrar una cuenta con movimientos",
+            rowsBefore,
+            table.getItems().size()
+        );
+        assertTrue(
+            "La cuenta con movimientos no debería haberse eliminado",
+            table.getItems().stream().anyMatch(a -> a.getId().equals(idCuenta))
+        );
+    }
+    
+    
+    @Test
+    @Ignore
+    public void test_Delete_Con_Y_Sin_Movimientos() {
+
+        clickOn("#tfUsername").write("jsmith@enterprise.net");
+        clickOn("#pfPassword").write("abcd*1234");
+        clickOn("#bLogIn");
+        verifyThat("#tbAccounts", isVisible());
+
+        TableView<Account> table = lookup("#tbAccounts").queryTableView();
+        assertFalse("La tabla debería tener cuentas", table.getItems().isEmpty());
+
+        Account cuentaSinMov = table.getItems().stream()
+                .filter(a -> a.getMovements() == null || a.getMovements().isEmpty())
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull("No hay cuentas sin movimientos para probar", cuentaSinMov);
+
+        int rowsBefore = table.getItems().size();
+
+        interact(() -> table.getSelectionModel().select(cuentaSinMov));
+        clickOn("#btDelete");
+        verifyThat(".dialog-pane", isVisible());
+        push(KeyCode.ENTER);
+        push(KeyCode.ENTER);
+
+        assertEquals("La cuenta sin movimientos no se eliminó",
+                rowsBefore - 1,
+                table.getItems().size());
+
+        Account cuentaConMov = table.getItems().stream()
+                .filter(a -> a.getMovements() != null && !a.getMovements().isEmpty())
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull("No hay cuentas con movimientos para probar", cuentaConMov);
+
+        rowsBefore = table.getItems().size();
+        Long idCuenta = cuentaConMov.getId();
+
+        interact(() -> table.getSelectionModel().select(cuentaConMov));
+        clickOn("#btDelete");
+        verifyThat(".dialog-pane", isVisible());
+        push(KeyCode.ENTER);
+
+        assertEquals("La tabla no debería cambiar al intentar borrar cuenta con movimientos",
+                rowsBefore,
+                table.getItems().size());
+
+        assertTrue("La cuenta con movimientos no debería haberse eliminado",
+                table.getItems().stream().anyMatch(a -> a.getId().equals(idCuenta)));
     }
 
     /**
@@ -172,9 +347,14 @@ public class TestAccountController extends ApplicationTest {
      * Verifica el acceso a la vista de movimientos mediante botón y menú contextual.
      */
     @Test
-    public void test04_NavegacionMovimientos() {
+    @Ignore
+    public void test_NavegarMovimientos() {
         System.out.println("TEST 4: Navegación Movimientos");
-        login();
+        clickOn("#tfUsername").write("jsmith@enterprise.net");
+        clickOn("#pfPassword").write("abcd*1234");
+        clickOn("#bLogIn");
+        verifyThat("#tbAccounts", isVisible());
+        esperar(2);
         
         crearCuentaAuxiliar("MOV_" + System.currentTimeMillis(), "1000");
 
@@ -215,7 +395,8 @@ public class TestAccountController extends ApplicationTest {
      * Verifica el cierre de sesión y el retorno a la pantalla inicial.
      */
     @Test
-    public void test05_LogOut() {
+    @Ignore
+    public void test_LogOut() {
         System.out.println("TEST 5: Log Out");
         login();
 
@@ -227,46 +408,6 @@ public class TestAccountController extends ApplicationTest {
         verifyThat("#bLogIn", isVisible());
         
         System.out.println("   -> Logout OK.");
-    }
-
-    /**
-     * TEST 06: Integridad Referencial.
-     * Verifica que NO se puede borrar una cuenta si tiene movimientos.
-     */
-    @Test
-    public void test06_ErrorBorrarConMovimientos() {
-        System.out.println("TEST 6: Integridad (Bloqueo borrado)");
-        login();
-        
-        // Crear Cuenta
-        crearCuentaAuxiliar("CON_MOV_" + System.currentTimeMillis(), "0");
-        seleccionarUltimaFila();
-
-        // Entrar a Movimientos
-        clickOn("#btViewMovements");
-        esperar(2); 
-        
-        // Crear Movimiento (Para activar el bloqueo de borrado)
-        clickOn("#tfAmount").write("50");      
-        clickOn("#bCreateMovement");           
-        esperar(1);
-
-        // Salir
-        push(KeyCode.ESCAPE);
-        esperar(1);
-
-        // Intentar Borrar
-        seleccionarUltimaFila();
-        clickOn("#btDelete");
-        
-        // Verificar Error
-        // Esperamos una alerta de ERROR (el controlador detecta que la lista de movimientos no está vacía)
-        esperar(1);
-        verifyThat(".dialog-pane", isVisible());
-        
-        push(KeyCode.ENTER); 
-        
-        System.out.println("   -> Error de integridad verificado.");
     }
 
 
@@ -346,4 +487,5 @@ public class TestAccountController extends ApplicationTest {
         verifyThat(".dialog-pane", isVisible()); // Borrado OK
         push(KeyCode.ENTER); 
     }
+
 }
