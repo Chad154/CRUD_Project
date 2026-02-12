@@ -105,7 +105,7 @@ public class TestAccountController extends ApplicationTest {
     
     @Test
     @Ignore
-    public void test_Read() {
+    public void test1_Read() {
         clickOn("#tfUsername").write("jsmith@enterprise.net");
         clickOn("#pfPassword").write("abcd*1234");
         clickOn("#bLogIn");
@@ -125,7 +125,7 @@ public class TestAccountController extends ApplicationTest {
     
     @Test
     @Ignore
-    public void test_Create() {
+    public void test2_Create() {
         clickOn("#tfUsername").write("jsmith@enterprise.net");
         clickOn("#pfPassword").write("abcd*1234");
         clickOn("#bLogIn");
@@ -158,7 +158,7 @@ public class TestAccountController extends ApplicationTest {
     
     @Test
     @Ignore
-    public void test_Update() {
+    public void test3_Update() {
 
         clickOn("#tfUsername").write("jsmith@enterprise.net");
         clickOn("#pfPassword").write("abcd*1234");
@@ -210,7 +210,7 @@ public class TestAccountController extends ApplicationTest {
     
     @Test
     @Ignore
-    public void test_Delete_Sin_Mov() {
+    public void test4_Delete_Sin_Mov() {
 
         clickOn("#tfUsername").write("jsmith@enterprise.net");
         clickOn("#pfPassword").write("abcd*1234");
@@ -246,7 +246,7 @@ public class TestAccountController extends ApplicationTest {
     
     @Test
     @Ignore
-    public void test_Delete_Con_Mov() {
+    public void test5_Delete_Con_Mov() {
 
         clickOn("#tfUsername").write("jsmith@enterprise.net");
         clickOn("#pfPassword").write("abcd*1234");
@@ -290,7 +290,7 @@ public class TestAccountController extends ApplicationTest {
     
     @Test
     @Ignore
-    public void test_Delete_Con_Y_Sin_Movimientos() {
+    public void test6_Delete_Con_Y_Sin_Movimientos() {
 
         clickOn("#tfUsername").write("jsmith@enterprise.net");
         clickOn("#pfPassword").write("abcd*1234");
