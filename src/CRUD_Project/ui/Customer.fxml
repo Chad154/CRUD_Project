@@ -6,7 +6,8 @@
 
 <AnchorPane prefHeight="800.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CRUD_Project.ui.CustomerController">
     <children>
-        <fx:include source="Menu.fxml" />
+        <!--FIXME: NO TOCAR la siguiente modificación necesaria: fx:id deber tener el valor "menuInclude" -->
+        <fx:include source="Menu.fxml" fx:id="menuInclude"/>
 
         <Label layoutX="387.0" layoutY="2.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Customers CRUD" />
    

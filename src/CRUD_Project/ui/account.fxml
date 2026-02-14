@@ -7,7 +7,9 @@
 
 <Pane prefHeight="850.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="CRUD_Project.ui.AccountController">
    <children>
-      <fx:include fx:id="hBoxMenu" source="Menu.fxml" layoutX="0.0" layoutY="0.0"/>
+        <!--FIXME: NO TOCAR la siguiente modificación necesaria: fx:id deber tener el valor "menuInclude" -->
+        <fx:include source="Menu.fxml" fx:id="menuInclude"/>
+        <!--fx:include fx:id="hBoxMenu" source="Menu.fxml" layoutX="0.0" layoutY="0.0"/-->
       
       <Label layoutX="144.0" layoutY="40.0" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Customer ID :" />
       

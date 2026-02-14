@@ -11,7 +11,18 @@
    <children>
       <MenuBar fx:id="menuBar" prefHeight="30.0" prefWidth="1024.0">
         <menus>
-          <Menu fx:id="menuActions" mnemonicParsing="false" text="Actions">
+            <!--TODO: Implementar estas acciones en todos los controladores de vistas
+            que incluyan este menú, es decir, cada uno en el suyo: Customer,Account o Movement-->
+            <Menu fx:id="menuAction" mnemonicParsing="false" text="Actions">
+                <items>
+                    <MenuItem text="Create" onAction="#handleCreate"/>
+                    <MenuItem text="Refresh" onAction="#handleRefresh"/>
+                    <MenuItem text="Update" onAction="#handleUpdate"/>
+                    <MenuItem text="Delete" onAction="#handleDelete"/>
+                </items>
+            </Menu> 
+
+            <Menu fx:id="menuNavigation" mnemonicParsing="false" text="Go to...">
             <items>
               <MenuItem fx:id="miViewMovements" mnemonicParsing="false" onAction="#handleViewMovementsMenu" text="View Movements" />
               
