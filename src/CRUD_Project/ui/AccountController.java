@@ -6,6 +6,7 @@ import CRUD_Project.logic.AccountRESTClient;
 import CRUD_Project.logic.MovementRESTClient;
 import CRUD_Project.model.Customer;
 import CRUD_Project.model.Movement;
+import java.net.URL;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -30,6 +31,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Modality;
 import java.util.Comparator; 
+import java.util.ResourceBundle;
+import javafx.fxml.Initializable;
 
 /**
  * Controlador para la vista de Gestión de Cuentas (Account).
@@ -47,7 +50,7 @@ import java.util.Comparator;
  * controlador es el manejador de acciones del menú.
  
  */
-public class AccountController {
+public class AccountController implements Initializable, MenuActionsHandler {
 
     /**
      * TODO: NO TOCAR La siguiente referencia debe llamarse así y tener este tipo.
@@ -109,7 +112,12 @@ public class AccountController {
      * tras cargar el archivo FXML.
      */
     @FXML
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
+        
+        if (menuIncludeController != null) {
+            menuIncludeController.setMenuActionsHandler(this);
+        }
+        
         // 1. Inicializar cliente REST
         try {
             restClient = new AccountRESTClient();
@@ -191,6 +199,27 @@ public class AccountController {
         btUpdate.setOnAction(e -> manejarActualizarCuenta());
         btDelete.setOnAction(e -> manejarEliminarCuenta());
         btViewMovements.setOnAction(e -> manejarVerMovimientos());
+    }
+    
+    @Override
+    public void onCreate() {
+        manejarCrearCuenta(new ActionEvent());
+    }
+
+    @Override
+    public void onUpdate() {
+        manejarActualizarCuenta();
+    }
+
+
+    @Override
+    public void onDelete() {
+        manejarEliminarCuenta();
+    }
+
+    @Override
+    public void onRefresh() {
+        cargarDatosDesdeServidor();
     }
 
     /**
@@ -583,4 +612,5 @@ public class AccountController {
     private void mostrarInformacion(String m) { 
         new Alert(Alert.AlertType.INFORMATION, m, ButtonType.OK).showAndWait(); 
     }
+
 }
