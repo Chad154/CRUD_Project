@@ -7,6 +7,14 @@ import CRUD_Project.logic.MovementRESTClient;
 import CRUD_Project.model.Customer;
 import CRUD_Project.model.Movement;
 import java.net.URL;
+import java.util.Collection;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,8 +28,10 @@ import javafx.stage.WindowEvent;
 import javax.ws.rs.core.GenericType;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random; 
 import java.util.Set;      
 import java.util.logging.Level;
@@ -220,6 +230,11 @@ public class AccountController implements Initializable, MenuActionsHandler {
     public void onRefresh() {
         cargarDatosDesdeServidor();
     }
+    
+    @Override
+    public void onPrint() {
+        manejarGenerarInforme();
+    }
 
     /**
      * Configura e inicializa el escenario (Stage) de la ventana.
@@ -351,6 +366,34 @@ public class AccountController implements Initializable, MenuActionsHandler {
         tfCreditLine.clear();
         if (tfBeginBalance != null) tfBeginBalance.clear();
         dpOpeningDate.setValue(null);
+    }
+    
+    @FXML
+    private void manejarGenerarInforme() {
+        try {
+             JasperReport report = JasperCompileManager.compileReport(
+                getClass().getResourceAsStream("/CRUD_Project/ui/Report/account_report.jrxml")
+            );
+
+            JRBeanCollectionDataSource dataItems =
+                new JRBeanCollectionDataSource(
+                    (Collection<Account>) tbAccounts.getItems()
+                );
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("CUSTOMER_ID", String.valueOf(user.getId()));
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(
+                report, parameters, dataItems
+            );
+
+            JasperViewer jasperViewer = new JasperViewer(jasperPrint, false);
+            jasperViewer.setVisible(true);
+
+        } catch (JRException ex) {
+            LOGGER.log(Level.SEVERE, "Error generating report", ex);
+            mostrarError("Error generating report: " + ex.getMessage());
+        }
     }
 
     // LÓGICA CRUD (Create, Read, Update, Delete)
