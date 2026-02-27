@@ -67,6 +67,13 @@ public class MenuController {
             handler.onDelete();
         }
     }
+    
+    @FXML
+    private void handlePrint() {
+        if (handler != null) {
+            handler.onPrint();
+        }
+    }
 
     /**
      * Permite al AccountController vincular su botón btViewMovements

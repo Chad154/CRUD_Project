@@ -5,6 +5,9 @@ import CRUD_Project.model.Customer;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +24,14 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.GenericType;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  * @todo @fixme Hacer que la siguiente clase implemente las interfaces
@@ -194,6 +205,49 @@ public class CustomerController implements MenuActionsHandler {
     @Override
     public void onDelete() {
         runSafe("menu delete", this::borrar);
+    }
+
+    @Override
+    public void onPrint() {
+        // Si no hay datos, evitamos abrir un reporte vacío
+        if (tvCustomers == null || tvCustomers.getItems() == null || tvCustomers.getItems().isEmpty()) {
+            mostrarInfo("Print", "No hay customers para imprimir.");
+            return;
+        }
+
+        try {
+            // 1) Cargar y compilar el JRXML desde resources (classpath)
+            java.io.InputStream jrxmlStream = getClass().getResourceAsStream("/CRUD_Project/ui/CustomerReport.jrxml");
+            if (jrxmlStream == null) {
+                mostrarError("Print", "No se encontró CustomerReport.jrxml en /CRUD_Project/ui/ (revisa resources).");
+                return;
+            }
+
+            JasperReport report = JasperCompileManager.compileReport(jrxmlStream);
+
+            // 2) DataSource: usar los items actuales de la tabla (lo que el usuario ve)
+            java.util.List<Customer> customers = new java.util.ArrayList<>(tvCustomers.getItems());
+            net.sf.jasperreports.engine.data.JRBeanCollectionDataSource dataSource
+                    = new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource(customers);
+
+            // 3) Parámetros (opcionales)
+            java.util.Map<String, Object> params = new java.util.HashMap<>();
+            params.put("REPORT_TITLE", "Customer Report");
+            params.put("GENERATED_AT", new java.util.Date());
+
+            // 4) Rellenar y mostrar
+            net.sf.jasperreports.engine.JasperPrint jasperPrint
+                    = net.sf.jasperreports.engine.JasperFillManager.fillReport(report, params, dataSource);
+
+            net.sf.jasperreports.view.JasperViewer.viewReport(jasperPrint, false);
+
+        } catch (net.sf.jasperreports.engine.JRException ex) {
+            LOGGER.log(Level.SEVERE, "Error printing customer report.", ex);
+            mostrarError("Print", "Error al generar el reporte:\n" + safeMsg(ex));
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Unexpected error printing report.", ex);
+            mostrarError("Print", "Error inesperado al imprimir:\n" + safeMsg(ex));
+        }
     }
 
     /**
@@ -925,4 +979,5 @@ public class CustomerController implements MenuActionsHandler {
         String m = ex.getMessage();
         return (m == null || m.trim().isEmpty()) ? ex.getClass().getSimpleName() : m.trim();
     }
+
 }

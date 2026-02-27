@@ -16,4 +16,5 @@ public interface MenuActionsHandler {
     public void onRefresh();
     public void onUpdate();
     public void onDelete();
+    public void onPrint();
 }

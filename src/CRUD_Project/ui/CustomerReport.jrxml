@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  CustomerReport.jrxml
+  - DataSource: JRBeanCollectionDataSource(List<Customer>)
+  - Fields map to getters in CRUD_Project.model.Customer:
+      getId(), getFirstName(), getLastName(), getEmail(), getPhone(), getCity(), getState()
+  - A4 Landscape (apaisado)
+-->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="CustomerReport"
+              pageWidth="842" pageHeight="595" orientation="Landscape"
+              columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20"
+              whenNoDataType="AllSectionsNoDetail">
+
+    <!-- ================= STYLES ================= -->
+    <style name="Base" isDefault="true" fontName="SansSerif" fontSize="10"/>
+
+    <style name="Title" style="Base" fontSize="18" isBold="true"/>
+
+    <style name="Header" style="Base"
+           isBold="true"
+           forecolor="#FFFFFF"
+           backcolor="#2E2E2E"
+           mode="Opaque"/>
+
+    <style name="Cell" style="Base"/>
+
+    <!-- ================= PARAMETERS (optional) ================= -->
+    <parameter name="REPORT_TITLE" class="java.lang.String"/>
+    <parameter name="GENERATED_AT" class="java.util.Date"/>
+
+    <!-- ================= FIELDS ================= -->
+    <field name="id" class="java.lang.Long"/>
+    <field name="firstName" class="java.lang.String"/>
+    <field name="lastName" class="java.lang.String"/>
+    <field name="email" class="java.lang.String"/>
+    <field name="phone" class="java.lang.Long"/>
+    <field name="city" class="java.lang.String"/>
+    <field name="state" class="java.lang.String"/>
+
+    <!-- ================= TITLE ================= -->
+    <title>
+        <band height="50">
+            <textField>
+                <reportElement x="0" y="0" width="802" height="30" style="Title"/>
+                <textFieldExpression><![CDATA[
+                    $P{REPORT_TITLE} == null ? "Customers Report" : $P{REPORT_TITLE}
+                ]]></textFieldExpression>
+            </textField>
+
+            <textField pattern="dd/MM/yyyy HH:mm">
+                <reportElement x="0" y="32" width="802" height="16" style="Base"/>
+                <textFieldExpression><![CDATA[
+                    $P{GENERATED_AT} == null ? new java.util.Date() : $P{GENERATED_AT}
+                ]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <!-- ================= COLUMN HEADER ================= -->
+    <columnHeader>
+        <band height="22">
+
+            <staticText>
+                <reportElement x="0" y="0" width="50" height="22" style="Header"/>
+                <text><![CDATA[ID]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="50" y="0" width="110" height="22" style="Header"/>
+                <text><![CDATA[Nombre]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="160" y="0" width="110" height="22" style="Header"/>
+                <text><![CDATA[Apellidos]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="270" y="0" width="260" height="22" style="Header"/>
+                <text><![CDATA[Email]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="530" y="0" width="100" height="22" style="Header"/>
+                <text><![CDATA[Teléfono]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="630" y="0" width="120" height="22" style="Header"/>
+                <text><![CDATA[Ciudad]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="750" y="0" width="52" height="22" style="Header"/>
+                <text><![CDATA[Estado]]></text>
+            </staticText>
+
+        </band>
+    </columnHeader>
+
+    <!-- ================= DETAIL ================= -->
+    <detail>
+        <band height="18">
+
+            <textField>
+                <reportElement x="0" y="0" width="50" height="18" style="Cell"/>
+                <textFieldExpression><![CDATA[
+                    $F{id} == null ? "" : String.valueOf($F{id})
+                ]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement x="50" y="0" width="110" height="18" style="Cell"/>
+                <textFieldExpression><![CDATA[
+                    $F{firstName} == null ? "" : $F{firstName}
+                ]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement x="160" y="0" width="110" height="18" style="Cell"/>
+                <textFieldExpression><![CDATA[
+                    $F{lastName} == null ? "" : $F{lastName}
+                ]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement x="270" y="0" width="260" height="18" style="Cell"/>
+                <textFieldExpression><![CDATA[
+                    $F{email} == null ? "" : $F{email}
+                ]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="530" y="0" width="100" height="18" style="Cell"/>
+                <textFieldExpression><![CDATA[
+                    $F{phone} == null ? "" : String.valueOf($F{phone})
+                ]]></textFieldExpression>
+            </textField>
+
+            <textField isStretchWithOverflow="true">
+                <reportElement x="630" y="0" width="120" height="18" style="Cell"/>
+                <textFieldExpression><![CDATA[
+                    $F{city} == null ? "" : $F{city}
+                ]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="750" y="0" width="52" height="18" style="Cell"/>
+                <textFieldExpression><![CDATA[
+                    $F{state} == null ? "" : $F{state}
+                ]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </detail>
+
+    <!-- ================= PAGE FOOTER ================= -->
+    <pageFooter>
+        <band height="18">
+            <textField>
+                <reportElement x="0" y="0" width="802" height="18" style="Base"/>
+                <textFieldExpression><![CDATA[
+                    "Página " + $V{PAGE_NUMBER}
+                ]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+
+</jasperReport>
