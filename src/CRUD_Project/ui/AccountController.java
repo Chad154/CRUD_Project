@@ -372,7 +372,7 @@ public class AccountController implements Initializable, MenuActionsHandler {
     private void manejarGenerarInforme() {
         try {
              JasperReport report = JasperCompileManager.compileReport(
-                getClass().getResourceAsStream("/CRUD_Project/ui/Report/account_report.jrxml")
+                getClass().getResourceAsStream("/CRUD_Project/ui/report/account_report.jrxml")
             );
 
             JRBeanCollectionDataSource dataItems =
