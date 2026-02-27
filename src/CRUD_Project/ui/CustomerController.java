@@ -217,7 +217,7 @@ public class CustomerController implements MenuActionsHandler {
 
         try {
             // 1) Cargar y compilar el JRXML desde resources (classpath)
-            java.io.InputStream jrxmlStream = getClass().getResourceAsStream("/CRUD_Project/ui/CustomerReport.jrxml");
+            java.io.InputStream jrxmlStream = getClass().getResourceAsStream("/CRUD_Project/ui/report/CustomerReport.jrxml");
             if (jrxmlStream == null) {
                 mostrarError("Print", "No se encontró CustomerReport.jrxml en /CRUD_Project/ui/ (revisa resources).");
                 return;
