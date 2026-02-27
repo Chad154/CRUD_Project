@@ -1,22 +1,36 @@
 package CRUD_Project.ui;
 
+
 import CRUD_Project.logic.AccountRESTClient;
 import CRUD_Project.logic.MovementRESTClient;
 import CRUD_Project.model.Account;
 import CRUD_Project.model.Movement;
+import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javax.ws.rs.core.GenericType;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  * @todo @fixme Hacer que la siguiente clase implemente las interfaces 
@@ -26,7 +40,7 @@ import javax.ws.rs.core.GenericType;
  * El método initialize debe llamar a setMenuActionsHandler() para establecer que este
  * controlador es el manejador de acciones del menú.
  */
-public class MovementController {
+public class MovementController implements Initializable, MenuActionsHandler {
 
     /**
      * TODO: NO TOCAR La siguiente referencia debe llamarse así y tener este tipo.
@@ -57,7 +71,12 @@ public class MovementController {
     private Account account; 
 
     @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        if (menuIncludeController != null) {
+            menuIncludeController.setMenuActionsHandler(this);
+        }
+
         // COLUMNAS
         colDate.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getTimestamp()));
         colDescription.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDescription()));
@@ -83,13 +102,13 @@ public class MovementController {
         });
 
         
-        tfAccountId.setEditable(false);
+        tfAccountId.setEditable(false); 
         cbType.setItems(FXCollections.observableArrayList("DEPOSIT", "PAYMENT"));
         cbType.getSelectionModel().selectFirst();
         //Estilo y funciones de enter y esc
         bCreateMovement.setStyle("-fx-color: #16a9f0;"); 
-        bCreateMovement.setDefaultButton(true);           
-        bGoBack.setCancelButton(true);                    
+        bCreateMovement.setDefaultButton(true);            
+        bGoBack.setCancelButton(true);                     
 
         bCreateMovement.setOnAction(this::handleCreateMovement);
         bUndoLastMovement.setOnAction(this::handleUndoLastMovement);
@@ -97,14 +116,84 @@ public class MovementController {
         
         bUndoLastMovement.setDisable(true); 
     }
+    
+   @Override
+    public void onPrint() {
+        try {
+            LOGGER.info("Beginning printing action for movements...");
 
+            // 1. Cargar el reporte con su ruta
+            JasperReport report = JasperCompileManager.compileReport(
+                getClass().getResourceAsStream("/CRUD_Project/ui/report/movementReport.jrxml")
+            );
+
+            // 2. Preparar los datos desde la TableView (tvMovements)
+            // Convertimos los items a una colección y luego al DataSource de Jasper
+            JRBeanCollectionDataSource dataItems = 
+                new JRBeanCollectionDataSource((Collection<Movement>) this.tvMovements.getItems());
+
+            // 3. Mapa de parámetros (vacío por ahora)
+            Map<String, Object> parameters = new HashMap<>();
+
+            // 4. Llenar el reporte con los datos y parámetros
+            JasperPrint jasperPrint = JasperFillManager.fillReport(report, parameters, dataItems);
+
+            // 5. Crear y mostrar la ventana del visor (JasperViewer)
+            // El parámetro 'false' evita que se cierre la aplicación principal al cerrar el visor
+            JasperViewer jasperViewer = new JasperViewer(jasperPrint, false);
+            jasperViewer.setTitle("Reports viewer");
+            jasperViewer.setVisible(true);
+
+        } catch (JRException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Document cannot be printed.");
+            alert.showAndWait();
+        }
+    }
+
+    @Override
+    public void onCreate() {// Se usa handleCreateMovement
+        handleCreateMovement(new ActionEvent());
+    }
+
+    @Override
+    public void onRefresh() {// Se usa loadMovements()
+        actualizarSaldoDesdeServidor();
+        loadMovements();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Action Refresh");
+        alert.setHeaderText(null);
+        alert.setContentText("Refreshed succesfully");
+        alert.showAndWait();
+    }
+
+    @Override
+    public void onUpdate() {//Como movimientos no tiene udate simplemente enseñamos un alert
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Action Update");
+        alert.setHeaderText(null);
+        alert.setContentText("You can not update in movements. "
+                + "You can only update in Customers and Accounts views");
+        alert.showAndWait();
+    }
+
+    @Override
+    public void onDelete() {//Se usa  handleUndoLastMovement
+        // Si esta deshabilitado salta un mensaje para inducar al usuario
+        if (!bUndoLastMovement.isDisabled()) {
+            handleUndoLastMovement(new ActionEvent());
+        } else {
+            mostrarError("You can only delete the last movements created.");
+        }
+    }
 
     public void initData(Stage stage, Account account) {
         this.stage = stage;
         this.account = account;
         tfAccountId.setText(String.valueOf(account.getId()));
         
-        // Carga inicial con datos actualizados
         actualizarSaldoDesdeServidor();
         loadMovements();
 
@@ -114,14 +203,12 @@ public class MovementController {
         });
     }
 
-    // Para evitar datos obsoletos, con un el objeto account que se pasa
     private void actualizarSaldoDesdeServidor() {
         AccountRESTClient client = null;
         try {
             client = new AccountRESTClient();
             Account cuentaFresca = client.find_XML(Account.class, String.valueOf(this.account.getId()));
             if (cuentaFresca != null) {
-                //Obtenemos el balance
                 this.account.setBalance(cuentaFresca.getBalance());
             }
         } catch (Exception e) {
@@ -137,83 +224,60 @@ public class MovementController {
         AccountRESTClient accountClient = null;
 
         try {
-            // validaciones
             if (tfAmount.getText().isEmpty()) return;
             double amountInput;
             try {
                 amountInput = Double.parseDouble(tfAmount.getText());
             } catch (NumberFormatException e) {
-                mostrarError("Introduce un número válido");
+                mostrarError("Introduce a valid number");
                 return;
             }
             if (amountInput <= 0) {
-                mostrarError("La cantidad debe ser positiva");
+                mostrarError("The amount must be positive");
                 return;
             }
             if (amountInput > MAX_AMOUNT_LIMIT) {
-                mostrarError("Límite superado");
+                mostrarError("Limit passed");
                 return;
             }
 
             movementClient = new MovementRESTClient();
             accountClient = new AccountRESTClient();
 
-            // Recuperar datos
             Account cuentaFresca = accountClient.find_XML(Account.class, String.valueOf(this.account.getId()));
-            
             GenericType<List<Movement>> listType = new GenericType<List<Movement>>() {};
             List<Movement> historial = movementClient.findMovementByAccount_XML(listType, String.valueOf(cuentaFresca.getId()));
 
             double saldoBaseCalculo;
-
             if (historial == null || historial.isEmpty()) {
-                // Aqui y SOLO aquí usamos el saldo inicial en caso de que sea el primer movimiento.
                 saldoBaseCalculo = (cuentaFresca.getBeginBalance() != null) ? cuentaFresca.getBeginBalance() : 0.0;
             } else {
-                //Aqui cuando hay otros movimientos, tenemos que suar el ultimo de todos y ordenamos para usarlo
-                historial.sort((m1, m2) -> {
-                    if (m1.getTimestamp() == null) return -1;
-                    if (m2.getTimestamp() == null) return 1;
-                    return m1.getTimestamp().compareTo(m2.getTimestamp());
-                });
-
+                historial.sort((m1, m2) -> m1.getTimestamp().compareTo(m2.getTimestamp()));
                 Movement ultimoMovimientoReal = historial.get(historial.size() - 1);
-                
-                // Usamos el saldo con el que quedó la cuenta tras ese movimiento
                 saldoBaseCalculo = (ultimoMovimientoReal.getBalance() != null) ? ultimoMovimientoReal.getBalance() : 0.0;
             }
 
-            // Verificar fondos
             double lineaCredito = (cuentaFresca.getCreditLine() != null) ? cuentaFresca.getCreditLine() : 0.0;
-            
             if ("PAYMENT".equals(cbType.getValue())) {
                 double totalDisponible = saldoBaseCalculo + lineaCredito;
-                
                 if (amountInput > totalDisponible) {
-                    mostrarError(String.format("Fondos insuficientes.\nSaldo Actual: %.2f\nCrédito: %.2f\nTotal Disp: %.2f", 
-                            saldoBaseCalculo, lineaCredito, totalDisponible));
+                    mostrarError(String.format("You dont have enough money.\nSaldo Actual: %.2f\nCredit: %.2f", saldoBaseCalculo, lineaCredito));
                     return;
                 }
-                amountInput = -amountInput; // Convertir a negativo
+                amountInput = -amountInput;
             }
 
-            // Calcular nuevo saldo
             Double nuevoSaldoFinal = saldoBaseCalculo + amountInput;
-
             Movement movement = new Movement();
             movement.setAmount(amountInput);
             movement.setDescription(cbType.getValue());
             movement.setTimestamp(new Date());
             movement.setBalance(nuevoSaldoFinal); 
 
-            // Crear el movimiento
             movementClient.create_XML(movement, String.valueOf(cuentaFresca.getId()));
-
-            // Actualizar la cuenta
             cuentaFresca.setBalance(nuevoSaldoFinal);
             accountClient.updateAccount_XML(cuentaFresca);
 
-            // Refrescar vista
             this.account.setBalance(nuevoSaldoFinal);
             tfAmount.clear();
             loadMovements();
@@ -228,6 +292,7 @@ public class MovementController {
         }
     }
 
+    @FXML
     private void handleUndoLastMovement(ActionEvent event) {
         if (tvMovements.getItems().isEmpty()) return;
 
@@ -238,7 +303,7 @@ public class MovementController {
         if (lastMovement == null) return;
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, 
-                "¿Undo movement of " + lastMovement.getAmount() + "€?", ButtonType.YES, ButtonType.NO);
+                "¿Undo last movement of " + lastMovement.getAmount() + "€?", ButtonType.YES, ButtonType.NO);
         confirm.showAndWait();
 
         if (confirm.getResult() == ButtonType.YES) {
@@ -246,28 +311,23 @@ public class MovementController {
             AccountRESTClient accountClient = null;
             
             try {
-                // leer saldo actual 
                 actualizarSaldoDesdeServidor();
                 Double saldoActual = (this.account.getBalance() != null) ? this.account.getBalance() : 0.0;
-                
-                // revertir la operacion
                 Double saldoRestaurado = saldoActual - lastMovement.getAmount();
 
-                // actualizar cuenta
                 this.account.setBalance(saldoRestaurado);
                 accountClient = new AccountRESTClient();
                 accountClient.updateAccount_XML(this.account);
 
-                // eliminar movimiento
                 movementClient = new MovementRESTClient();
                 movementClient.remove(lastMovement.getId().toString());
 
-                // bloquear y refrescar
+                // IMPORTANTE: Tras usar Undo/Delete, se vuelve a bloquear hasta el siguiente Create
                 bUndoLastMovement.setDisable(true);
                 loadMovements();
                 
             } catch (Exception e) {
-                mostrarError("Error undoing movement.");
+                mostrarError("Error UndoMovement.");
                 e.printStackTrace();
             } finally {
                 if (movementClient != null) movementClient.close();
@@ -301,4 +361,4 @@ public class MovementController {
     }
     
     private void mostrarError(String m) { new Alert(Alert.AlertType.ERROR, m, ButtonType.OK).showAndWait(); }
-}
+} 
