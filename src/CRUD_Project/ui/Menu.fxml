@@ -19,6 +19,7 @@
                     <MenuItem text="Refresh" onAction="#handleRefresh"/>
                     <MenuItem text="Update" onAction="#handleUpdate"/>
                     <MenuItem text="Delete" onAction="#handleDelete"/>
+                    <MenuItem text="Print" onAction="#handlePrint"/>
                 </items>
             </Menu> 
 

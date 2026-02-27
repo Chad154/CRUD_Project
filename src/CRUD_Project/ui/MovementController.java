@@ -1,14 +1,18 @@
 package CRUD_Project.ui;
 
+
 import CRUD_Project.logic.AccountRESTClient;
 import CRUD_Project.logic.MovementRESTClient;
 import CRUD_Project.model.Account;
 import CRUD_Project.model.Movement;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleObjectProperty;
@@ -20,6 +24,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javax.ws.rs.core.GenericType;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  * @todo @fixme Hacer que la siguiente clase implemente las interfaces 
@@ -104,6 +115,42 @@ public class MovementController implements Initializable, MenuActionsHandler {
         bGoBack.setOnAction(e -> handleGoBack());
         
         bUndoLastMovement.setDisable(true); 
+    }
+    
+   @Override
+    public void onPrint() {
+        try {
+            LOGGER.info("Beginning printing action for movements...");
+
+            // 1. Cargar el reporte con su ruta
+            JasperReport report = JasperCompileManager.compileReport(
+                getClass().getResourceAsStream("/CRUD_Project/ui/report/movementReport.jrxml")
+            );
+
+            // 2. Preparar los datos desde la TableView (tvMovements)
+            // Convertimos los items a una colección y luego al DataSource de Jasper
+            JRBeanCollectionDataSource dataItems = 
+                new JRBeanCollectionDataSource((Collection<Movement>) this.tvMovements.getItems());
+
+            // 3. Mapa de parámetros (vacío por ahora)
+            Map<String, Object> parameters = new HashMap<>();
+
+            // 4. Llenar el reporte con los datos y parámetros
+            JasperPrint jasperPrint = JasperFillManager.fillReport(report, parameters, dataItems);
+
+            // 5. Crear y mostrar la ventana del visor (JasperViewer)
+            // El parámetro 'false' evita que se cierre la aplicación principal al cerrar el visor
+            JasperViewer jasperViewer = new JasperViewer(jasperPrint, false);
+            jasperViewer.setTitle("Reports viewer");
+            jasperViewer.setVisible(true);
+
+        } catch (JRException ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Document cannot be printed.");
+            alert.showAndWait();
+        }
     }
 
     @Override
