@@ -6,6 +6,15 @@ import CRUD_Project.logic.AccountRESTClient;
 import CRUD_Project.logic.MovementRESTClient;
 import CRUD_Project.model.Customer;
 import CRUD_Project.model.Movement;
+import java.net.URL;
+import java.util.Collection;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,8 +28,10 @@ import javafx.stage.WindowEvent;
 import javax.ws.rs.core.GenericType;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random; 
 import java.util.Set;      
 import java.util.logging.Level;
@@ -29,7 +40,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.stage.Modality;
-import java.util.Comparator; 
+import java.util.ResourceBundle;
+import javafx.fxml.Initializable;
 
 /**
  * Controlador para la vista de Gestión de Cuentas (Account).
@@ -47,7 +59,7 @@ import java.util.Comparator;
  * controlador es el manejador de acciones del menú.
  
  */
-public class AccountController {
+public class AccountController implements Initializable, MenuActionsHandler {
 
     /**
      * TODO: NO TOCAR La siguiente referencia debe llamarse así y tener este tipo.
@@ -109,7 +121,12 @@ public class AccountController {
      * tras cargar el archivo FXML.
      */
     @FXML
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
+        
+        if (menuIncludeController != null) {
+            menuIncludeController.setMenuActionsHandler(this);
+        }
+        
         // 1. Inicializar cliente REST
         try {
             restClient = new AccountRESTClient();
@@ -191,6 +208,32 @@ public class AccountController {
         btUpdate.setOnAction(e -> manejarActualizarCuenta());
         btDelete.setOnAction(e -> manejarEliminarCuenta());
         btViewMovements.setOnAction(e -> manejarVerMovimientos());
+    }
+    
+    @Override
+    public void onCreate() {
+        manejarCrearCuenta(new ActionEvent());
+    }
+
+    @Override
+    public void onUpdate() {
+        manejarActualizarCuenta();
+    }
+
+
+    @Override
+    public void onDelete() {
+        manejarEliminarCuenta();
+    }
+
+    @Override
+    public void onRefresh() {
+        cargarDatosDesdeServidor();
+    }
+    
+    @Override
+    public void onPrint() {
+        manejarGenerarInforme();
     }
 
     /**
@@ -323,6 +366,34 @@ public class AccountController {
         tfCreditLine.clear();
         if (tfBeginBalance != null) tfBeginBalance.clear();
         dpOpeningDate.setValue(null);
+    }
+    
+    @FXML
+    private void manejarGenerarInforme() {
+        try {
+             JasperReport report = JasperCompileManager.compileReport(
+                getClass().getResourceAsStream("/CRUD_Project/ui/report/account_report.jrxml")
+            );
+
+            JRBeanCollectionDataSource dataItems =
+                new JRBeanCollectionDataSource(
+                    (Collection<Account>) tbAccounts.getItems()
+                );
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("CUSTOMER_ID", String.valueOf(user.getId()));
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(
+                report, parameters, dataItems
+            );
+
+            JasperViewer jasperViewer = new JasperViewer(jasperPrint, false);
+            jasperViewer.setVisible(true);
+
+        } catch (JRException ex) {
+            LOGGER.log(Level.SEVERE, "Error generating report", ex);
+            mostrarError("Error generating report: " + ex.getMessage());
+        }
     }
 
     // LÓGICA CRUD (Create, Read, Update, Delete)
@@ -583,4 +654,5 @@ public class AccountController {
     private void mostrarInformacion(String m) { 
         new Alert(Alert.AlertType.INFORMATION, m, ButtonType.OK).showAndWait(); 
     }
+
 }
