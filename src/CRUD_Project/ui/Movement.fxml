@@ -16,6 +16,9 @@
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="CRUD_Project.ui.MovementController">
    <children>
+        <!--FIXME: NO TOCAR la siguiente modificación necesaria: fx:id deber tener el valor "menuInclude" -->
+        <fx:include source="Menu.fxml" fx:id="menuInclude"/>
+               
       <Button fx:id="bUndoLastMovement" layoutX="840.0" layoutY="589.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="158.0" text="Undo Last Movement" />
       <TableView fx:id="tvMovements" layoutX="151.0" layoutY="253.0" prefHeight="361.0" prefWidth="681.0">
         <columns>

@@ -26,6 +26,56 @@ public class MenuController {
     private Button linkedButton;
 
     /**
+     * @todo El siguiente código permite la implementación de las acciones CRUD
+     * desde el menú reutilizable de forma diferente(polimorfismo) en cada vista 
+     * que lo incluya.
+     */
+    private MenuActionsHandler handler;
+    /**
+     * Este método debe ser utilizado para indicar desde cada controlador de vista que
+     * incluya el menú que controlador se encargará de manejar cada acción.
+     * @param handler La clase que implementa MenuActionsHandler.
+     */
+    public void setMenuActionsHandler(MenuActionsHandler handler) {
+        this.handler = handler;
+    }
+
+    @FXML
+    private void handleCreate() {
+        if (handler != null) {
+            handler.onCreate();
+        }
+    }
+
+    @FXML
+    private void handleUpdate() {
+        if (handler != null) {
+            handler.onUpdate();
+        }
+    }
+
+    @FXML
+    private void handleRefresh() {
+        if (handler != null) {
+            handler.onRefresh();
+        }
+    }
+
+    @FXML
+    private void handleDelete() {
+        if (handler != null) {
+            handler.onDelete();
+        }
+    }
+    
+    @FXML
+    private void handlePrint() {
+        if (handler != null) {
+            handler.onPrint();
+        }
+    }
+
+    /**
      * Permite al AccountController vincular su botón btViewMovements
      * para que el menú pueda disparar su acción.
      */

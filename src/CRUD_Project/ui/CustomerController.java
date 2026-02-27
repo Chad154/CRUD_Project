@@ -3,7 +3,12 @@ package CRUD_Project.ui;
 import CRUD_Project.logic.CustomerRESTClient;
 import CRUD_Project.model.Customer;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
@@ -19,8 +24,32 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.GenericType;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 
-public class CustomerController {
+/**
+ * @todo @fixme Hacer que la siguiente clase implemente las interfaces
+ * Initializable y MenuActionsHandler para que al pulsar en las acciones CRUD
+ * del menú Actions se ejecuten los métodos manejadores correspondientes a la
+ * vista que incluye el menú. El método initialize debe llamar a
+ * setMenuActionsHandler() para establecer que este controlador es el manejador
+ * de acciones del menú.
+ */
+public class CustomerController implements MenuActionsHandler {
+
+    /**
+     * TODO: NO TOCAR La siguiente referencia debe llamarse así y tener este
+     * tipo. JavaFX asigna automáticamente el campo menuIncludeController cuando
+     * usas fx:id="menuInclude".
+     */
+    @FXML
+    private MenuController menuIncludeController;
 
     // Logger para registrar errores e información relevante de la pantalla
     private static final Logger LOGGER = Logger.getLogger(CustomerController.class.getName());
@@ -91,6 +120,16 @@ public class CustomerController {
     // Lista observable que alimenta la TableView
     private final ObservableList<Customer> lista = FXCollections.observableArrayList();
 
+    // ================= INITIALIZE =================
+    @FXML
+    private void initialize() {
+        if (menuIncludeController != null) {
+            menuIncludeController.setMenuActionsHandler(this);
+        } else {
+            LOGGER.warning("menuIncludeController = null. Revisa fx:id=\"menuInclude\" en el <fx:include>.");
+        }
+    }
+
     /**
      * Inicializa la pantalla: - Configura las columnas de la tabla. - Enlaza
      * listeners y acciones de botones. - Carga la lista inicial de customers
@@ -145,6 +184,70 @@ public class CustomerController {
         btExit.setCancelButton(true);
         btSearch.setDefaultButton(true);
         tfId.requestFocus();
+    }
+
+    //Menu Polimorfismo
+    @Override
+    public void onCreate() {
+        runSafe("menu create", this::crear);
+    }
+
+    @Override
+    public void onRefresh() {
+        runSafe("menu refresh", this::cargarLista);
+    }
+
+    @Override
+    public void onUpdate() {
+        runSafe("menu update", this::actualizar);
+    }
+
+    @Override
+    public void onDelete() {
+        runSafe("menu delete", this::borrar);
+    }
+
+    @Override
+    public void onPrint() {
+        // Si no hay datos, evitamos abrir un reporte vacío
+        if (tvCustomers == null || tvCustomers.getItems() == null || tvCustomers.getItems().isEmpty()) {
+            mostrarInfo("Print", "No hay customers para imprimir.");
+            return;
+        }
+
+        try {
+            // 1) Cargar y compilar el JRXML desde resources (classpath)
+            java.io.InputStream jrxmlStream = getClass().getResourceAsStream("/CRUD_Project/ui/report/CustomerReport.jrxml");
+            if (jrxmlStream == null) {
+                mostrarError("Print", "No se encontró CustomerReport.jrxml en /CRUD_Project/ui/ (revisa resources).");
+                return;
+            }
+
+            JasperReport report = JasperCompileManager.compileReport(jrxmlStream);
+
+            // 2) DataSource: usar los items actuales de la tabla (lo que el usuario ve)
+            java.util.List<Customer> customers = new java.util.ArrayList<>(tvCustomers.getItems());
+            net.sf.jasperreports.engine.data.JRBeanCollectionDataSource dataSource
+                    = new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource(customers);
+
+            // 3) Parámetros (opcionales)
+            java.util.Map<String, Object> params = new java.util.HashMap<>();
+            params.put("REPORT_TITLE", "Customer Report");
+            params.put("GENERATED_AT", new java.util.Date());
+
+            // 4) Rellenar y mostrar
+            net.sf.jasperreports.engine.JasperPrint jasperPrint
+                    = net.sf.jasperreports.engine.JasperFillManager.fillReport(report, params, dataSource);
+
+            net.sf.jasperreports.view.JasperViewer.viewReport(jasperPrint, false);
+
+        } catch (net.sf.jasperreports.engine.JRException ex) {
+            LOGGER.log(Level.SEVERE, "Error printing customer report.", ex);
+            mostrarError("Print", "Error al generar el reporte:\n" + safeMsg(ex));
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Unexpected error printing report.", ex);
+            mostrarError("Print", "Error inesperado al imprimir:\n" + safeMsg(ex));
+        }
     }
 
     /**
@@ -876,4 +979,5 @@ public class CustomerController {
         String m = ex.getMessage();
         return (m == null || m.trim().isEmpty()) ? ex.getClass().getSimpleName() : m.trim();
     }
+
 }
